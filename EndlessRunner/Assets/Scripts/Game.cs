@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class Game : MonoBehaviour {
     [SerializeField]
+    SkylineGenerator[] skylineGenerators;
+
+    [SerializeField]
     Runner runner;
 
     [SerializeField]
@@ -19,6 +22,9 @@ public class Game : MonoBehaviour {
     void StartNewGame() {
         trackingCamera.StartNewGame();
         runner.StartNewGame();
+        for (int i = 0; i < skylineGenerators.Length; i++) {
+            skylineGenerators[i].StartNewGame(trackingCamera);
+        }
         isPlaying = true;
     }
 
@@ -42,5 +48,8 @@ public class Game : MonoBehaviour {
         runner.UpdateVisualization();
         trackingCamera.Track(runner.Position);
         displayText.SetText("{0}", Mathf.Floor(runner.Position.x));
+        for (int i = 0; i < skylineGenerators.Length; i++) {
+            skylineGenerators[i].FillView(trackingCamera);
+        }
     }
 }
