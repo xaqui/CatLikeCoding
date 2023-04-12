@@ -6,6 +6,9 @@ public class Game : MonoBehaviour {
     SkylineGenerator[] skylineGenerators;
 
     [SerializeField]
+    SkylineGenerator obstacleGenerator;
+
+    [SerializeField]
     Runner runner;
 
     [SerializeField]
@@ -22,6 +25,7 @@ public class Game : MonoBehaviour {
     void StartNewGame() {
         trackingCamera.StartNewGame();
         runner.StartNewGame();
+        obstacleGenerator.StartNewGame(trackingCamera);
         for (int i = 0; i < skylineGenerators.Length; i++) {
             skylineGenerators[i].StartNewGame(trackingCamera);
         }
@@ -48,6 +52,7 @@ public class Game : MonoBehaviour {
         runner.UpdateVisualization();
         trackingCamera.Track(runner.Position);
         displayText.SetText("{0}", Mathf.Floor(runner.Position.x));
+        obstacleGenerator.FillView(trackingCamera);
         for (int i = 0; i < skylineGenerators.Length; i++) {
             skylineGenerators[i].FillView(trackingCamera);
         }

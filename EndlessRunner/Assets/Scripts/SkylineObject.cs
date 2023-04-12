@@ -10,6 +10,10 @@ public class SkylineObject : MonoBehaviour {
     float extents;
     public float MaxX => transform.localPosition.x + extents;
 
+    [SerializeField]
+    FloatRange gapY;
+    public FloatRange GapY => gapY.Shift(transform.localPosition.y);
+
     public SkylineObject GetInstance() {
         if (pool == null) {
             pool = new();
