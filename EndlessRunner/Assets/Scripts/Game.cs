@@ -48,7 +48,6 @@ public class Game : MonoBehaviour {
             accumulateDeltaTime -= maxDeltaTime;
         }
         isPlaying = isPlaying && runner.Run(accumulateDeltaTime);
-        isPlaying = runner.Run(Time.deltaTime);
         runner.UpdateVisualization();
         trackingCamera.Track(runner.Position);
         displayText.SetText("{0}", Mathf.Floor(runner.Position.x));
