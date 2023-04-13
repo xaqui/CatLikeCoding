@@ -1,6 +1,9 @@
 using UnityEngine;
 
 public class TrackingCamera : MonoBehaviour {
+    [SerializeField]
+    AnimationCurve yCurve;
+
     Vector3 offset, position;
     float viewFactorX;
     public FloatRange VisibleX(float z) =>
@@ -31,6 +34,7 @@ public class TrackingCamera : MonoBehaviour {
 
     public void Track(Vector3 focusPoint) {
         position = focusPoint + offset;
+        position.y = yCurve.Evaluate(position.y);
         transform.localPosition = position;
     }
 }

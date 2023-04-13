@@ -60,7 +60,6 @@ public class Game : MonoBehaviour {
     void UpdateGame() {
         if (Input.GetKeyDown(KeyCode.Space)) {
             runner.StartJumping();
-            Debug.Log("Jump");
         }
         if (Input.GetKeyUp(KeyCode.Space)) {
             runner.EndJumping();

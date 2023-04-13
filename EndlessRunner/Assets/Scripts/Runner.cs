@@ -19,7 +19,17 @@ public class Runner : MonoBehaviour {
     [SerializeField]
     AnimationCurve runAccelerationCurve;
 
-    public float SpeedX => velocity.x;
+    [SerializeField, Min(0f)]
+    float spinDuration = 0.75f;
+
+    float spinTimeRemaining;
+
+    Vector3 spinRotation;
+
+    public float SpeedX {
+        get => velocity.x;
+        set => velocity.x = value;
+    }
 
     SkylineObject currentObstacle;
 
@@ -43,7 +53,7 @@ public class Runner : MonoBehaviour {
             currentObstacle = currentObstacle.Next;
         }
         position = new Vector2(0f, currentObstacle.GapY.min + extents);
-        transform.localPosition = position;
+        transform.SetPositionAndRotation(position, Quaternion.identity);
         meshRenderer.enabled = true;
         pointLight.enabled = true;
         explosionSystem.Clear();
@@ -53,6 +63,7 @@ public class Runner : MonoBehaviour {
         transitioning = false;
         grounded = true;
         jumpTimeRemaining = 0f;
+        spinTimeRemaining = 0f;
         velocity = new Vector2(startSpeedX, 0f);
     }
     public bool Run(float dt) {
@@ -103,12 +114,23 @@ public class Runner : MonoBehaviour {
     public void StartJumping() {
         if (grounded) {
             jumpTimeRemaining = jumpDuration.max;
+            if (spinTimeRemaining <= 0f) {
+                spinTimeRemaining = spinDuration;
+                spinRotation = Vector3.zero;
+                spinRotation[Random.Range(0, 3)] = Random.value < 0.5f ? -90f : 90f;
+            }
         }
     }
     public void EndJumping() => jumpTimeRemaining += jumpDuration.min - jumpDuration.max;
 
     public void UpdateVisualization() {
         transform.localPosition = position;
+        if (spinTimeRemaining > 0f) {
+            spinTimeRemaining = Mathf.Max(spinTimeRemaining - Time.deltaTime, 0f);
+            transform.localRotation = Quaternion.Euler(
+                Vector3.Lerp(spinRotation, Vector3.zero, spinTimeRemaining / spinDuration)
+            );
+        }
     }
     void ConstrainY(SkylineObject obstacle) {
         FloatRange openY = obstacle.GapY;
@@ -123,6 +145,7 @@ public class Runner : MonoBehaviour {
             velocity.y = Mathf.Min(velocity.y, 0f);
             jumpTimeRemaining = 0f;
         }
+        obstacle.Check(this);
     }
     bool CheckCollision() {
         Vector2 transitionPoint;

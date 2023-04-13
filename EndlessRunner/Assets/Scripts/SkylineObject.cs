@@ -14,6 +14,8 @@ public class SkylineObject : MonoBehaviour {
     FloatRange gapY;
     public FloatRange GapY => gapY.Shift(transform.localPosition.y);
 
+    public virtual void Check(Runner runner) { }
+
     public SkylineObject GetInstance() {
         if (pool == null) {
             pool = new();
