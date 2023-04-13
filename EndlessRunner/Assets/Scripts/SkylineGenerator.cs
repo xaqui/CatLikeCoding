@@ -14,6 +14,12 @@ public class SkylineGenerator : MonoBehaviour {
     [SerializeField]
     SkylineObject gapPrefab;
 
+    [SerializeField, Min(0f)]
+    float maxYDifference;
+
+    [SerializeField]
+    bool singleSequenceStart;
+
     const float border = 10f;
 
     Vector3 endPosition;
@@ -37,14 +43,14 @@ public class SkylineGenerator : MonoBehaviour {
 
         FloatRange visibleX = view.VisibleX(distance).GrowExtents(border);
         endPosition = new Vector3(visibleX.min, altitude.RandomValue, distance);
-        sequenceEndX = sequenceLength.RandomValue;
+        sequenceEndX = singleSequenceStart ? visibleX.max : endPosition.x + sequenceLength.RandomValue;
 
         leftmost = rightmost = GetInstance();
         endPosition = rightmost.PlaceAfter(endPosition);
         FillView(view);
         return leftmost;
     }
-    public void FillView(TrackingCamera view) {
+    public void FillView(TrackingCamera view, float extraGapLength = 0f, float extraSequenceLength = 0f) {
         FloatRange visibleX = view.VisibleX(distance).GrowExtents(border);
         while (leftmost != rightmost && leftmost.MaxX < visibleX.min) {
             leftmost = leftmost.Recycle();
@@ -52,7 +58,8 @@ public class SkylineGenerator : MonoBehaviour {
 
         while (endPosition.x < visibleX.max) {
             if (endPosition.x > sequenceEndX) {
-                StartNewSequence(gapLength.RandomValue, sequenceLength.RandomValue);
+                StartNewSequence(gapLength.RandomValue + extraGapLength,
+                    sequenceLength.RandomValue + extraSequenceLength);
             }
             rightmost = rightmost.Next = GetInstance();
             endPosition = rightmost.PlaceAfter(endPosition);
@@ -65,8 +72,17 @@ public class SkylineGenerator : MonoBehaviour {
             rightmost.FillGap(endPosition, gap);
         }
         endPosition.x += gap;
-        endPosition.y = altitude.RandomValue;
         sequenceEndX = endPosition.x + sequence;
+
+        if (maxYDifference > 0f) {
+            endPosition.y = new FloatRange(
+                Mathf.Max(endPosition.y - maxYDifference, altitude.min),
+                Mathf.Min(endPosition.y + maxYDifference, altitude.max)
+            ).RandomValue;
+        }
+        else {
+            endPosition.y = altitude.RandomValue;
+        }
     }
 
 }

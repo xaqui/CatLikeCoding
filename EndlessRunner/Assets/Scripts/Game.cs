@@ -10,19 +10,35 @@ public class Game : MonoBehaviour {
 
     [SerializeField]
     Runner runner;
-
+    
     [SerializeField]
     TrackingCamera trackingCamera;
 
     [SerializeField]
-    TextMeshPro displayText;
+    TextMeshProUGUI displayText;
+    int score = 0;
+    [SerializeField]
+    TextMeshProUGUI hiScoreText;
+    int hiScore = 0;
 
     [SerializeField, Min(0.001f)]
     float maxDeltaTime = 1f / 120f;
 
+    [SerializeField]
+    float extraGapFactor = 0.5f, extraSequenceFactor = 1f;
+
     bool isPlaying;
 
     void StartNewGame() {
+        
+        if(score > hiScore) {
+            hiScoreText.text = score+"";
+            hiScore = score;
+        } else {
+            hiScoreText.text = hiScore + "";
+        }
+        score = 0;
+        
         trackingCamera.StartNewGame();
         runner.StartNewGame(obstacleGenerator.StartNewGame(trackingCamera));
         trackingCamera.Track(runner.Position);
@@ -58,7 +74,10 @@ public class Game : MonoBehaviour {
         runner.UpdateVisualization();
         trackingCamera.Track(runner.Position);
         displayText.SetText("{0}", Mathf.Floor(runner.Position.x));
-        obstacleGenerator.FillView(trackingCamera);
+        score = (int) runner.Position.x;
+        obstacleGenerator.FillView(trackingCamera,
+            runner.SpeedX * extraGapFactor,
+            runner.SpeedX * extraSequenceFactor);
         for (int i = 0; i < skylineGenerators.Length; i++) {
             skylineGenerators[i].FillView(trackingCamera);
         }

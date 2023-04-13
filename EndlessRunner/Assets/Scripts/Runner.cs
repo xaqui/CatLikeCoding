@@ -19,6 +19,8 @@ public class Runner : MonoBehaviour {
     [SerializeField]
     AnimationCurve runAccelerationCurve;
 
+    public float SpeedX => velocity.x;
+
     SkylineObject currentObstacle;
 
     MeshRenderer meshRenderer;
