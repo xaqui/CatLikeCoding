@@ -42,4 +42,9 @@ public class SkylineObject : MonoBehaviour {
         position.x += extents;
         return position;
     }
+    public void FillGap(Vector3 position, float gap) {
+        extents = gap * 0.5f;
+        position.x += extents;
+        transform.localPosition = position;
+    }
 }

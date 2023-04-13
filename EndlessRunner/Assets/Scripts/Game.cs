@@ -24,8 +24,8 @@ public class Game : MonoBehaviour {
 
     void StartNewGame() {
         trackingCamera.StartNewGame();
-        runner.StartNewGame();
-        obstacleGenerator.StartNewGame(trackingCamera);
+        runner.StartNewGame(obstacleGenerator.StartNewGame(trackingCamera));
+        trackingCamera.Track(runner.Position);
         for (int i = 0; i < skylineGenerators.Length; i++) {
             skylineGenerators[i].StartNewGame(trackingCamera);
         }
@@ -42,9 +42,16 @@ public class Game : MonoBehaviour {
     }
 
     void UpdateGame() {
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            runner.StartJumping();
+            Debug.Log("Jump");
+        }
+        if (Input.GetKeyUp(KeyCode.Space)) {
+            runner.EndJumping();
+        }
         float accumulateDeltaTime = Time.deltaTime;
         while (accumulateDeltaTime > maxDeltaTime && isPlaying) {
-            isPlaying = runner.Run(maxDeltaTime);
+            isPlaying = runner.Run(maxDeltaTime);runner.Run(maxDeltaTime);
             accumulateDeltaTime -= maxDeltaTime;
         }
         isPlaying = isPlaying && runner.Run(accumulateDeltaTime);

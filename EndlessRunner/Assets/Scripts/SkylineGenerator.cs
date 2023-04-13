@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class SkylineGenerator : MonoBehaviour {
@@ -9,6 +10,9 @@ public class SkylineGenerator : MonoBehaviour {
 
     [SerializeField]
     FloatRange altitude;
+
+    [SerializeField]
+    SkylineObject gapPrefab;
 
     const float border = 10f;
 
@@ -25,6 +29,21 @@ public class SkylineGenerator : MonoBehaviour {
         return instance;
     }
 
+
+    public SkylineObject StartNewGame(TrackingCamera view) {
+        while (leftmost != null) {
+            leftmost = leftmost.Recycle();
+        }
+
+        FloatRange visibleX = view.VisibleX(distance).GrowExtents(border);
+        endPosition = new Vector3(visibleX.min, altitude.RandomValue, distance);
+        sequenceEndX = sequenceLength.RandomValue;
+
+        leftmost = rightmost = GetInstance();
+        endPosition = rightmost.PlaceAfter(endPosition);
+        FillView(view);
+        return leftmost;
+    }
     public void FillView(TrackingCamera view) {
         FloatRange visibleX = view.VisibleX(distance).GrowExtents(border);
         while (leftmost != rightmost && leftmost.MaxX < visibleX.min) {
@@ -39,21 +58,12 @@ public class SkylineGenerator : MonoBehaviour {
             endPosition = rightmost.PlaceAfter(endPosition);
         }
     }
-
-    public void StartNewGame(TrackingCamera view) {
-        while (leftmost != null) {
-            leftmost = leftmost.Recycle();
-        }
-
-        FloatRange visibleX = view.VisibleX(distance).GrowExtents(border);
-        endPosition = new Vector3(visibleX.min, altitude.RandomValue, distance);
-        sequenceEndX = sequenceLength.RandomValue;
-
-        leftmost = rightmost = GetInstance();
-        endPosition = rightmost.PlaceAfter(endPosition);
-        FillView(view);
-    }
     void StartNewSequence(float gap, float sequence) {
+        if (gapPrefab != null) {
+            rightmost = rightmost.Next = gapPrefab.GetInstance();
+            rightmost.transform.SetParent(transform, false);
+            rightmost.FillGap(endPosition, gap);
+        }
         endPosition.x += gap;
         endPosition.y = altitude.RandomValue;
         sequenceEndX = endPosition.x + sequence;

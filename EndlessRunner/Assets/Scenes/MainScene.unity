@@ -436,10 +436,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9de3e71cfb670a6429661362f0e6acb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extents: 0.5
+  jumpDuration:
+    min: 0.1
+    max: 0.2
   pointLight: {fileID: 1228698810}
   explosionSystem: {fileID: 1036795348}
   trailSystem: {fileID: 2042842708}
   startSpeedX: 5
+  maxSpeedX: 40
+  jumpAcceleration: 100
+  gravity: 40
+  runAccelerationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &604409225
 GameObject:
   m_ObjectHideFlags: 0
@@ -5571,6 +5602,7 @@ MonoBehaviour:
   altitude:
     min: -5
     max: -1
+  gapPrefab: {fileID: 0}
   gapLength:
     min: 1
     max: 30
@@ -20351,6 +20383,7 @@ MonoBehaviour:
   altitude:
     min: -2
     max: 2
+  gapPrefab: {fileID: 6362131520060203138, guid: 54cdc63626692274396656bc1fd6f60c, type: 3}
   gapLength:
     min: 0
     max: 5
@@ -20407,6 +20440,7 @@ MonoBehaviour:
   altitude:
     min: 5
     max: 15
+  gapPrefab: {fileID: 0}
   gapLength:
     min: 0
     max: 0
@@ -20461,6 +20495,7 @@ MonoBehaviour:
   altitude:
     min: -5
     max: -1
+  gapPrefab: {fileID: 0}
   gapLength:
     min: 2
     max: 10
