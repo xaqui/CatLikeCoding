@@ -839,6 +839,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 10
   maxAcceleration: 10
+  jumpHeight: 2
+  maxAirJumps: 1
 --- !u!96 &2078839539
 TrailRenderer:
   serializedVersion: 2
