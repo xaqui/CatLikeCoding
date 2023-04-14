@@ -502,10 +502,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &88162219
 TrailRenderer:
   serializedVersion: 2
@@ -734,10 +735,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &112038888
 TrailRenderer:
   serializedVersion: 2
@@ -1203,7 +1205,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &168238215
 Mesh:
@@ -1967,7 +1969,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!850595691 &219006410
 LightingSettings:
@@ -2082,10 +2084,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &230567444
 TrailRenderer:
   serializedVersion: 2
@@ -2358,7 +2361,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &242630312
 Mesh:
@@ -2575,10 +2578,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &242648940
 TrailRenderer:
   serializedVersion: 2
@@ -3190,7 +3194,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 25
+  m_RootOrder: 23
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &246251372
 GameObject:
@@ -3626,7 +3630,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 29
+  m_RootOrder: 27
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &313823814
 GameObject:
@@ -4062,7 +4066,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 17
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &317214992
 Mesh:
@@ -4990,7 +4994,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 24
+  m_RootOrder: 22
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &450023907
 GameObject:
@@ -5043,10 +5047,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &450023910
 TrailRenderer:
   serializedVersion: 2
@@ -5822,7 +5827,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 15
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &481645459
 GameObject:
@@ -5875,10 +5880,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &481645462
 TrailRenderer:
   serializedVersion: 2
@@ -6490,7 +6496,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 23
+  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &493283799
 GameObject:
@@ -6543,10 +6549,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &493283802
 TrailRenderer:
   serializedVersion: 2
@@ -7158,7 +7165,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 20
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &526909939
 GameObject:
@@ -7211,10 +7218,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &526909942
 TrailRenderer:
   serializedVersion: 2
@@ -7701,10 +7709,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &657886669
 TrailRenderer:
   serializedVersion: 2
@@ -8316,7 +8325,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 21
+  m_RootOrder: 19
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &736562332
 GameObject:
@@ -8369,10 +8378,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &736562335
 TrailRenderer:
   serializedVersion: 2
@@ -8765,10 +8775,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &861335798
 TrailRenderer:
   serializedVersion: 2
@@ -9206,7 +9217,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &914675584
 GameObject:
@@ -9303,7 +9314,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &926131049
 Mesh:
@@ -9903,7 +9914,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 28
+  m_RootOrder: 26
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &992071166
 GameObject:
@@ -9956,10 +9967,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &992071169
 TrailRenderer:
   serializedVersion: 2
@@ -10735,7 +10747,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1016994110
 GameObject:
@@ -10832,7 +10844,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1078316165
 GameObject:
@@ -10885,10 +10897,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &1078316168
 TrailRenderer:
   serializedVersion: 2
@@ -11064,7 +11077,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 29
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1101015170
 Mesh:
@@ -11664,7 +11677,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1231055196
 Mesh:
@@ -12264,7 +12277,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 18
+  m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1376152133
 Mesh:
@@ -12645,10 +12658,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &1455565777
 TrailRenderer:
   serializedVersion: 2
@@ -13260,7 +13274,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 16
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1783389346
 GameObject:
@@ -13314,8 +13328,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 7.99
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -13338,14 +13352,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1783389346}
-  m_LocalRotation: {x: 0.48071438, y: 0.21398282, z: -0.12223592, w: 0.8415364}
-  m_LocalPosition: {x: -0.57598054, y: 35.606243, z: -0.6610937}
+  m_LocalRotation: {x: 0.008726558, y: 0, z: 0, w: 0.999962}
+  m_LocalPosition: {x: 10, y: 5, z: -22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 1, y: 0, z: 0}
 --- !u!43 &1790064283
 Mesh:
   m_ObjectHideFlags: 0
@@ -13605,7 +13619,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1879727079
 GameObject:
@@ -13658,10 +13672,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &1879727082
 TrailRenderer:
   serializedVersion: 2
@@ -14273,7 +14288,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 26
+  m_RootOrder: 24
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1923425611
 GameObject:
@@ -14709,7 +14724,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 19
+  m_RootOrder: 17
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1938652528
 Mesh:
@@ -15309,7 +15324,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 22
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1952447613
 GameObject:
@@ -15362,10 +15377,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &1952447616
 TrailRenderer:
   serializedVersion: 2
@@ -15977,7 +15993,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2010843710
 GameObject:
@@ -16413,7 +16429,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 27
+  m_RootOrder: 25
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2021963479
 GameObject:
@@ -16849,7 +16865,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &2049388956
 Mesh:
@@ -17066,10 +17082,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &2057303044
 TrailRenderer:
   serializedVersion: 2
@@ -17298,10 +17315,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &2078839539
 TrailRenderer:
   serializedVersion: 2
@@ -17477,7 +17495,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 28
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2088377615
 GameObject:
@@ -17530,10 +17548,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &2088377618
 TrailRenderer:
   serializedVersion: 2
@@ -17762,10 +17781,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxAcceleration: 100
+  maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
+  maxGroundAngle: 25
 --- !u!96 &2144281991
 TrailRenderer:
   serializedVersion: 2

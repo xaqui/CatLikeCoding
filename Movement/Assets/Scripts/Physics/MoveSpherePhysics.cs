@@ -10,15 +10,23 @@ public class MoveSpherePhysics : MonoBehaviour
     float jumpHeight = 2f;
     [SerializeField, Range(0, 5)]
     int maxAirJumps = 0;
+    [SerializeField, Range(0f, 90f)]
+    float maxGroundAngle = 25f;
 
     Vector3 velocity, desiredVelocity;
     Rigidbody body;
     bool desiredJump;
     bool onGround;
     int jumpPhase;
+    float minGroundDotProduct;
+    Vector3 contactNormal;
 
+    void OnValidate() {
+        minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
+    }
     void Awake() {
         body = GetComponent<Rigidbody>();
+        OnValidate();
     }
 
     void Update() {
@@ -48,16 +56,19 @@ public class MoveSpherePhysics : MonoBehaviour
         velocity = body.velocity;
         if (onGround) {
             jumpPhase = 0;
+        } else {
+            contactNormal = Vector3.up;
         }
     }
     void Jump() {
         if(onGround || jumpPhase < maxAirJumps) {
             jumpPhase += 1;
             float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
-            if (velocity.y > 0f) {
-                jumpSpeed = Mathf.Max(jumpSpeed - velocity.y, 0f);
+            float alignedSpeed = Vector3.Dot(velocity, contactNormal);
+            if (alignedSpeed > 0f) {
+                jumpSpeed = Mathf.Max(jumpSpeed - alignedSpeed, 0f);
             }
-            velocity.y += jumpSpeed;
+            velocity += contactNormal * jumpSpeed;
         }
     }
     void OnCollisionStay(Collision collision) {
@@ -69,7 +80,10 @@ public class MoveSpherePhysics : MonoBehaviour
     void EvaluateCollision(Collision collision) {
         for (int i = 0; i < collision.contactCount; i++) {
             Vector3 normal = collision.GetContact(i).normal;
-            onGround |= normal.y >= 0.9f;
+            if (normal.y >= minGroundDotProduct) {
+                onGround = true;
+                contactNormal = normal;
+            }
         }
     }
 
