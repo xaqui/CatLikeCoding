@@ -216,7 +216,7 @@ MonoBehaviour:
   maxAirAcceleration: 0
   jumpHeight: 2
   maxAirJumps: 1
-  maxGroundAngle: 30
+  maxGroundAngle: 45
 --- !u!54 &8511068319853520014
 Rigidbody:
   m_ObjectHideFlags: 0

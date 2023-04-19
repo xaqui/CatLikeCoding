@@ -20,6 +20,7 @@ public class MoveSpherePhysics : MonoBehaviour
     int jumpPhase;
     float minGroundDotProduct;
     Vector3 contactNormal;
+    int stepsSinceLastGrounded;
 
     bool OnGround => groundContactCount > 0;
 
@@ -32,7 +33,8 @@ public class MoveSpherePhysics : MonoBehaviour
     }
 
     void Update() {
-        GetComponent<Renderer>().material.SetColor("_Color", Color.white * (groundContactCount * 0.25f));
+        //GetComponent<Renderer>().material.SetColor("_Color", Color.white * (groundContactCount * 0.25f));
+        GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
         Vector2 playerInput;
         playerInput.x = Input.GetAxis("Horizontal");
         playerInput.y = Input.GetAxis("Vertical");
@@ -53,9 +55,30 @@ public class MoveSpherePhysics : MonoBehaviour
         body.velocity = velocity;
         ClearState();
     }
+    bool SnapToGround() {
+        if (stepsSinceLastGrounded > 1) {
+            return false;
+        }
+        if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit)) {
+            return false;
+        }
+        if (hit.normal.y < minGroundDotProduct) {
+            return false;
+        }
+        groundContactCount = 1;
+        contactNormal = hit.normal;
+        float speed = velocity.magnitude;
+        float dot = Vector3.Dot(velocity, hit.normal);
+        if (dot > 0f) {
+            velocity = (velocity - hit.normal * dot).normalized * speed;
+        }
+        return true;
+    }
     void UpdateState() {
+        stepsSinceLastGrounded += 1;
         velocity = body.velocity;
-        if (OnGround) {
+        if (OnGround || SnapToGround()) {
+            stepsSinceLastGrounded = 0;
             jumpPhase = 0;
             if (groundContactCount > 1) {
                 contactNormal.Normalize();
