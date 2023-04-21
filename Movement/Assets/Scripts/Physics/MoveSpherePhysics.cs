@@ -23,13 +23,14 @@ public class MoveSpherePhysics : MonoBehaviour
     Vector3 velocity, desiredVelocity;
     Rigidbody body;
     bool desiredJump;
-    int groundContactCount;
     int jumpPhase;
     float minGroundDotProduct, minStairsDotProduct;
-    Vector3 contactNormal;
+    Vector3 contactNormal, steepNormal;
+    int groundContactCount, steepContactCount;
     int stepsSinceLastGrounded, stepsSinceLastJump;
 
     bool OnGround => groundContactCount > 0;
+    bool OnSteep => steepContactCount > 0;
 
     void OnValidate() {
         minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -89,7 +90,7 @@ public class MoveSpherePhysics : MonoBehaviour
         stepsSinceLastGrounded += 1;
         stepsSinceLastJump += 1;
         velocity = body.velocity;
-        if (OnGround || SnapToGround()) {
+        if (OnGround || SnapToGround() || CheckSteepContacts()) {
             stepsSinceLastGrounded = 0;
             jumpPhase = 0;
             if (groundContactCount > 1) {
@@ -100,8 +101,8 @@ public class MoveSpherePhysics : MonoBehaviour
         }
     }
     void ClearState() {
-        groundContactCount = 0;
-        contactNormal = Vector3.zero;
+        groundContactCount = steepContactCount = 0;
+        contactNormal = steepNormal = Vector3.zero;
     }
     void Jump() {
         if(OnGround || jumpPhase < maxAirJumps) {
@@ -125,9 +126,15 @@ public class MoveSpherePhysics : MonoBehaviour
         float minDot = GetMinDot(collision.gameObject.layer);
         for (int i = 0; i < collision.contactCount; i++) {
             Vector3 normal = collision.GetContact(i).normal;
+            // Ground contact
             if (normal.y >= minDot) {
                 groundContactCount += 1;
                 contactNormal += normal;
+            }
+            // No ground contact, check for steepness
+            else if (normal.y > -0.01f) {
+                steepContactCount += 1;
+                steepNormal += normal;
             }
         }
     }
@@ -152,6 +159,18 @@ public class MoveSpherePhysics : MonoBehaviour
         float newZ = Mathf.MoveTowards(currentZ, desiredVelocity.z, maxSpeedChange);
 
         velocity += xAxis * (newX - currentX) + zAxis * (newZ - currentZ);
+    }
+
+    bool CheckSteepContacts() {
+        if (steepContactCount > 1) {
+            steepNormal.Normalize();
+            if (steepNormal.y >= minGroundDotProduct) {
+                groundContactCount = 1;
+                contactNormal = steepNormal;
+                return true;
+            }
+        }
+        return false;
     }
 
 }
