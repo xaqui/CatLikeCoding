@@ -43,7 +43,7 @@ public class MoveSpherePhysics : MonoBehaviour
 
     void Update() {
         //GetComponent<Renderer>().material.SetColor("_Color", Color.white * (groundContactCount * 0.25f));
-        GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
+        //GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
         Vector2 playerInput;
         playerInput.x = Input.GetAxis("Horizontal");
         playerInput.y = Input.GetAxis("Vertical");
@@ -92,7 +92,9 @@ public class MoveSpherePhysics : MonoBehaviour
         velocity = body.velocity;
         if (OnGround || SnapToGround() || CheckSteepContacts()) {
             stepsSinceLastGrounded = 0;
-            jumpPhase = 0;
+            if (stepsSinceLastJump > 1) {
+                jumpPhase = 0;
+            }
             if (groundContactCount > 1) {
                 contactNormal.Normalize();
             }
@@ -105,16 +107,31 @@ public class MoveSpherePhysics : MonoBehaviour
         contactNormal = steepNormal = Vector3.zero;
     }
     void Jump() {
-        if(OnGround || jumpPhase < maxAirJumps) {
-            stepsSinceLastJump = 0;
-            jumpPhase += 1;
-            float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
-            float alignedSpeed = Vector3.Dot(velocity, contactNormal);
-            if (alignedSpeed > 0f) {
-                jumpSpeed = Mathf.Max(jumpSpeed - alignedSpeed, 0f);
+        Vector3 jumpDirection;
+        if (OnGround) {
+            jumpDirection = contactNormal;
+        } else if (OnSteep) {
+            jumpDirection = steepNormal;
+            jumpPhase = 0;
+        } else if (maxAirJumps > 0 && jumpPhase <= maxAirJumps) {
+            if (jumpPhase == 0) {
+                jumpPhase = 1;
             }
-            velocity += contactNormal * jumpSpeed;
+            jumpDirection = contactNormal;
+        } else {
+            return;
         }
+        stepsSinceLastJump = 0;
+        jumpPhase += 1;
+        float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
+        // Add upward bias to wall jump
+        jumpDirection = (jumpDirection + Vector3.up).normalized;
+        float alignedSpeed = Vector3.Dot(velocity, jumpDirection);
+        if (alignedSpeed > 0f) {
+            jumpSpeed = Mathf.Max(jumpSpeed - alignedSpeed, 0f);
+        }
+        velocity += jumpDirection * jumpSpeed;
+
     }
     void OnCollisionStay(Collision collision) {
         EvaluateCollision(collision);
