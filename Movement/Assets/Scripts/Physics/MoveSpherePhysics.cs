@@ -10,8 +10,15 @@ public class MoveSpherePhysics : MonoBehaviour
     float jumpHeight = 2f;
     [SerializeField, Range(0, 5)]
     int maxAirJumps = 0;
+    [Header("Ground Snapping Settings Parameters")]
     [SerializeField, Range(0f, 90f)]
     float maxGroundAngle = 25f;
+    [SerializeField, Range(0f, 100f)]
+    float maxSnapSpeed = 100f;
+    [SerializeField, Min(0f)]
+    float probeDistance = 1f;
+    [SerializeField]
+    LayerMask probeMask = -1;
 
     Vector3 velocity, desiredVelocity;
     Rigidbody body;
@@ -20,7 +27,7 @@ public class MoveSpherePhysics : MonoBehaviour
     int jumpPhase;
     float minGroundDotProduct;
     Vector3 contactNormal;
-    int stepsSinceLastGrounded;
+    int stepsSinceLastGrounded, stepsSinceLastJump;
 
     bool OnGround => groundContactCount > 0;
 
@@ -56,10 +63,14 @@ public class MoveSpherePhysics : MonoBehaviour
         ClearState();
     }
     bool SnapToGround() {
-        if (stepsSinceLastGrounded > 1) {
+        if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2) {
             return false;
         }
-        if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit)) {
+        float speed = velocity.magnitude;
+        if (speed > maxSnapSpeed) {
+            return false;
+        }
+        if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit, probeDistance, probeMask)) {
             return false;
         }
         if (hit.normal.y < minGroundDotProduct) {
@@ -67,7 +78,6 @@ public class MoveSpherePhysics : MonoBehaviour
         }
         groundContactCount = 1;
         contactNormal = hit.normal;
-        float speed = velocity.magnitude;
         float dot = Vector3.Dot(velocity, hit.normal);
         if (dot > 0f) {
             velocity = (velocity - hit.normal * dot).normalized * speed;
@@ -76,6 +86,7 @@ public class MoveSpherePhysics : MonoBehaviour
     }
     void UpdateState() {
         stepsSinceLastGrounded += 1;
+        stepsSinceLastJump += 1;
         velocity = body.velocity;
         if (OnGround || SnapToGround()) {
             stepsSinceLastGrounded = 0;
@@ -93,6 +104,7 @@ public class MoveSpherePhysics : MonoBehaviour
     }
     void Jump() {
         if(OnGround || jumpPhase < maxAirJumps) {
+            stepsSinceLastJump = 0;
             jumpPhase += 1;
             float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
             float alignedSpeed = Vector3.Dot(velocity, contactNormal);

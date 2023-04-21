@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8511068319853520012}
   - component: {fileID: 8511068319853520013}
   - component: {fileID: 8511068319853520014}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SpherePhysics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -217,6 +217,11 @@ MonoBehaviour:
   jumpHeight: 2
   maxAirJumps: 1
   maxGroundAngle: 45
+  maxSnapSpeed: 100
+  probeDistance: 1
+  probeMask:
+    serializedVersion: 2
+    m_Bits: 260
 --- !u!54 &8511068319853520014
 Rigidbody:
   m_ObjectHideFlags: 0
