@@ -12,20 +12,20 @@ public class MoveSpherePhysics : MonoBehaviour
     int maxAirJumps = 0;
     [Header("Ground Snapping Settings Parameters")]
     [SerializeField, Range(0f, 90f)]
-    float maxGroundAngle = 25f;
+    float maxGroundAngle = 25f, maxStairsAngle = 50f;
     [SerializeField, Range(0f, 100f)]
     float maxSnapSpeed = 100f;
     [SerializeField, Min(0f)]
     float probeDistance = 1f;
     [SerializeField]
-    LayerMask probeMask = -1;
+    LayerMask probeMask = -1, stairsMask = -1;
 
     Vector3 velocity, desiredVelocity;
     Rigidbody body;
     bool desiredJump;
     int groundContactCount;
     int jumpPhase;
-    float minGroundDotProduct;
+    float minGroundDotProduct, minStairsDotProduct;
     Vector3 contactNormal;
     int stepsSinceLastGrounded, stepsSinceLastJump;
 
@@ -33,6 +33,7 @@ public class MoveSpherePhysics : MonoBehaviour
 
     void OnValidate() {
         minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
+        minStairsDotProduct = Mathf.Cos(maxStairsAngle * Mathf.Deg2Rad);
     }
     void Awake() {
         body = GetComponent<Rigidbody>();
@@ -73,7 +74,7 @@ public class MoveSpherePhysics : MonoBehaviour
         if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit, probeDistance, probeMask)) {
             return false;
         }
-        if (hit.normal.y < minGroundDotProduct) {
+        if (hit.normal.y < GetMinDot(hit.collider.gameObject.layer)) {
             return false;
         }
         groundContactCount = 1;
@@ -121,9 +122,10 @@ public class MoveSpherePhysics : MonoBehaviour
         EvaluateCollision(collision);
     }
     void EvaluateCollision(Collision collision) {
+        float minDot = GetMinDot(collision.gameObject.layer);
         for (int i = 0; i < collision.contactCount; i++) {
             Vector3 normal = collision.GetContact(i).normal;
-            if (normal.y >= minGroundDotProduct) {
+            if (normal.y >= minDot) {
                 groundContactCount += 1;
                 contactNormal += normal;
             }
@@ -131,6 +133,10 @@ public class MoveSpherePhysics : MonoBehaviour
     }
     Vector3 ProjectOnContactPlane(Vector3 vector) {
         return vector - contactNormal * Vector3.Dot(vector, contactNormal);
+    }
+    float GetMinDot(int layer) {
+        return (stairsMask & (1 << layer)) == 0 ?
+            minGroundDotProduct : minStairsDotProduct;
     }
     void AdjustVelocity() {
         Vector3 xAxis = ProjectOnContactPlane(Vector3.right).normalized;
