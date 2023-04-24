@@ -225,6 +225,11 @@ MonoBehaviour:
   focusRadius: 1
   focusCentering: 0.5
   focusCenteringSpeed: 7
+  rotationSpeed: 90
+  minVerticalAngle: -30
+  maxVerticalAngle: 60
+  alignDelay: 5
+  alignSmoothRange: 45
 --- !u!4 &224635682 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8511068319853520008, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
@@ -281,6 +286,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8511068319853520013, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
+      propertyPath: playerInputSpace
+      value: 
+      objectReference: {fileID: 201352690}
     - target: {fileID: 8511068319853520014, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
       propertyPath: m_Interpolate
       value: 1
