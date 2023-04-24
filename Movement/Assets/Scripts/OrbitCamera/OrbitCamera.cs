@@ -25,8 +25,15 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField, Range(-89f, 89f)]
     float minVerticalAngle = -30f, maxVerticalAngle = 60f;
 
-    Vector3 focusPoint;
+    [SerializeField, Min(0f)]
+    float alignDelay = 5f;
+
+    [SerializeField, Range(0f, 90f)]
+    float alignSmoothRange = 45f;
+
+    Vector3 focusPoint, previousFocusPoint;
     Vector2 orbitAngles = new Vector2(45f, 0f);
+    float lastManualRotationTime;
 
     void Awake() {
         focusPoint = focus.position;
@@ -53,7 +60,7 @@ public class OrbitCamera : MonoBehaviour
         UpdateFocusPoint();
         ManualRotation();
         Quaternion lookRotation;
-        if (ManualRotation()) {
+        if (ManualRotation() || AutomaticRotation()) {
             ConstrainAngles();
             lookRotation = Quaternion.Euler(orbitAngles);
         }
@@ -65,6 +72,7 @@ public class OrbitCamera : MonoBehaviour
         transform.SetPositionAndRotation(lookPosition, lookRotation);
     }
     void UpdateFocusPoint() {
+        previousFocusPoint = focusPoint;
         Vector3 targetPoint = focus.position;
         if (focusRadius > 0f) {
             float distance = Vector3.Distance(targetPoint, focusPoint);
@@ -91,9 +99,41 @@ public class OrbitCamera : MonoBehaviour
         const float e = 0.001f;
         if (input.x < -e || input.x > e || input.y < -e || input.y > e) {
             orbitAngles += rotationSpeed * Time.unscaledDeltaTime * input;
+            lastManualRotationTime = Time.unscaledTime;
             return true;
         }
         return false;
+    }
+
+    /// <returns>false if manual rotation has occurred before the duration of align delay,
+    /// or if the amount of manual rotation was smaller than a small threshold</returns>
+    bool AutomaticRotation() {
+        if (Time.unscaledTime - lastManualRotationTime < alignDelay) {
+            return false;
+        }
+        Vector2 movement = new Vector2(
+            focusPoint.x - previousFocusPoint.x,
+            focusPoint.z - previousFocusPoint.z
+        );
+        float movementDeltaSqr = movement.sqrMagnitude;
+        if (movementDeltaSqr < 0.0001f) {
+            return false;
+        }
+        float headingAngle = GetAngle(movement / Mathf.Sqrt(movementDeltaSqr));
+        float deltaAbs = Mathf.Abs(Mathf.DeltaAngle(orbitAngles.y, headingAngle));
+        float rotationChange = rotationSpeed * Mathf.Min(Time.unscaledDeltaTime, movementDeltaSqr);
+        if (deltaAbs < alignSmoothRange) {
+            rotationChange *= deltaAbs / alignSmoothRange;
+        } else if (180f - deltaAbs < alignSmoothRange) {
+            rotationChange *= (180f - deltaAbs) / alignSmoothRange;
+        }
+        orbitAngles.y = Mathf.MoveTowardsAngle(orbitAngles.y, headingAngle, rotationChange);
+        return true;
+    }
+
+    static float GetAngle(Vector2 direction) {
+        float angle = Mathf.Acos(direction.y) * Mathf.Rad2Deg;
+        return direction.x < 0f ? 360f - angle : angle;
     }
 
 }
