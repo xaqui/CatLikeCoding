@@ -222,6 +222,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   focus: {fileID: 224635682}
   distance: 5
+  focusRadius: 1
+  focusCentering: 0.5
+  focusCenteringSpeed: 7
 --- !u!4 &224635682 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8511068319853520008, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
