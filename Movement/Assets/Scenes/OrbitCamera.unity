@@ -228,8 +228,11 @@ MonoBehaviour:
   rotationSpeed: 90
   minVerticalAngle: -30
   maxVerticalAngle: 60
-  alignDelay: 5
+  alignDelay: 1
   alignSmoothRange: 45
+  obstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!4 &224635682 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8511068319853520008, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
@@ -944,7 +947,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8511068319853520008, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 6.42
       objectReference: {fileID: 0}
     - target: {fileID: 8511068319853520008, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
       propertyPath: m_LocalRotation.w
