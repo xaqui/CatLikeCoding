@@ -12,6 +12,7 @@ public class MoveSpherePhysics : MonoBehaviour
     float jumpHeight = 2f;
     [SerializeField, Range(0, 5)]
     int maxAirJumps = 0;
+
     [Header("Ground Snapping Settings Parameters")]
     [SerializeField, Range(0f, 90f)]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
@@ -41,6 +42,8 @@ public class MoveSpherePhysics : MonoBehaviour
     }
     void Awake() {
         body = GetComponent<Rigidbody>();
+        // Disable Unity standard gravity to override with our custom gravity
+        body.useGravity = false;
         OnValidate();
     }
 
@@ -66,13 +69,16 @@ public class MoveSpherePhysics : MonoBehaviour
 
   
     private void FixedUpdate() {
-        upAxis = -Physics.gravity.normalized;
+        Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
         UpdateState();
         AdjustVelocity();
         if (desiredJump) {
             desiredJump = false;
-            Jump();
+            Jump(gravity);
         }
+
+        velocity += gravity * Time.deltaTime;
+
         body.velocity = velocity;
         ClearState();
     }
@@ -119,7 +125,7 @@ public class MoveSpherePhysics : MonoBehaviour
         groundContactCount = steepContactCount = 0;
         contactNormal = steepNormal = Vector3.zero;
     }
-    void Jump() {
+    void Jump(Vector3 gravity) {
         Vector3 jumpDirection;
         if (OnGround) {
             jumpDirection = contactNormal;
@@ -136,7 +142,7 @@ public class MoveSpherePhysics : MonoBehaviour
         }
         stepsSinceLastJump = 0;
         jumpPhase += 1;
-        float jumpSpeed = Mathf.Sqrt(2f * Physics.gravity.magnitude * jumpHeight);
+        float jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
         // Add upward bias to wall jump
         jumpDirection = (jumpDirection + upAxis).normalized;
         float alignedSpeed = Vector3.Dot(velocity, jumpDirection);
