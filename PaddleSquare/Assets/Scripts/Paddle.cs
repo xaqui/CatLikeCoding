@@ -7,7 +7,7 @@ public abstract class Paddle : MonoBehaviour
 
     [SerializeField] bool isAI;
 
-    [SerializeField, Min(0f)] float speed = 10f;
+    [SerializeField, Min(0f)] protected float speed = 10f;
 
     bool isActive = true;
 
@@ -17,6 +17,7 @@ public abstract class Paddle : MonoBehaviour
         gameObject.SetActive(false);
     }
     abstract protected void AlignToWall();
+    abstract protected float AdjustByPlayer(float y);
     protected void Setup() {
         AlignToWall();
         gameObject.SetActive(true);
@@ -28,18 +29,6 @@ public abstract class Paddle : MonoBehaviour
         float limit = arenaExtents - extents.y;
         p.z = Mathf.Clamp(p.z, -limit, limit);
         transform.localPosition = p;
-    }
-
-    float AdjustByPlayer(float y) {
-        bool goUp = Input.GetKey(KeyCode.UpArrow);
-        bool goDown = Input.GetKey(KeyCode.DownArrow);
-        if (goUp && !goDown) {
-            return y + speed * Time.deltaTime;
-        }
-        else if (goDown && !goUp) {
-            return y - speed * Time.deltaTime;
-        }
-        return y;
     }
 
     float AdjustByAI(float y, float target) {
@@ -60,14 +49,14 @@ public abstract class Paddle : MonoBehaviour
         yield return null;
     }
 
-    public bool HitBall(Vector2 ballPosition, float ballExtents, out Vector2 HitPoint) {
+    public bool HitBall(Vector2 ballPosition, float ballExtents, out Vector2 HitPoint, out float HitFactor) {
         Vector2 paddlePosition2D = new Vector2(transform.localPosition.x, transform.localPosition.z);
-        /*float hitFactor =
+        HitFactor =
             (ballPosition.y - paddlePosition2D.y) /
-            (extents.y + ballExtents);*/
+            (paddlePosition2D.y +extents.y/2 + ballExtents);
 
-        Vector2 rectMin = paddlePosition2D - extents;
-        Vector2 rectMax = paddlePosition2D + extents;
+        Vector2 rectMin = paddlePosition2D - extents/2;
+        Vector2 rectMax = paddlePosition2D + extents/2;
 
         float closestX = Mathf.Clamp(ballPosition.x, rectMin.x, rectMax.x);
         float closestY = Mathf.Clamp(ballPosition.y, rectMin.y, rectMax.y);

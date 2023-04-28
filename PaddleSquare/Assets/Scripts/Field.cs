@@ -2,14 +2,15 @@ using UnityEngine;
 
 public class Field : MonoBehaviour
 {
-    public readonly static float WALL_SEPARATION= 2.5f;
+    public readonly static float WALL_SEPARATION= 4.5f;
     
     [SerializeField] GameObject PosZWall;
     [SerializeField] GameObject NegZWall;
     [SerializeField] GameObject PosXWall;
     [SerializeField] GameObject NegXWall;
+    [SerializeField] GameObject Net;
 
-    public static readonly Vector2 FieldSize = new Vector2(32f,24f);
+    public static readonly Vector2 FieldSize = new Vector2(40f,24f);
 
     private void Awake() {
         CalculateFieldBounds();
@@ -23,6 +24,8 @@ public class Field : MonoBehaviour
         PosXWall.transform.localScale = new Vector3(FieldSize.x-1,1,1);
         NegZWall.transform.localScale = new Vector3(1,1,FieldSize.y+1);
         PosZWall.transform.localScale = new Vector3(1,1,FieldSize.y+1);
+        Net.transform.localScale = new Vector3(.5f,FieldSize.y - 1, 1);
+        Net.GetComponent<MeshRenderer>().material.mainTextureScale =new Vector2(1, FieldSize.y+10);
     }
 
 }
