@@ -54,7 +54,6 @@ public class MoveSpherePhysics : MonoBehaviour
         playerInput.x = Input.GetAxis("Horizontal");
         playerInput.y = Input.GetAxis("Vertical");
         playerInput = Vector2.ClampMagnitude(playerInput, 1f);
-        Vector3 acceleration = new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
         if (playerInputSpace) {
             rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, upAxis);
             forwardAxis = ProjectDirectionOnPlane(playerInputSpace.forward, upAxis);
@@ -203,6 +202,7 @@ public class MoveSpherePhysics : MonoBehaviour
             steepNormal.Normalize();
             float upDot = Vector3.Dot(upAxis, steepNormal);
             if (upDot >= minGroundDotProduct) {
+                steepContactCount = 0;
                 groundContactCount = 1;
                 contactNormal = steepNormal;
                 return true;

@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/ComplexGravity.unity
+    guid: e8d06a7c473a19e4b8b8ea456b1bbbee
   m_configObjects: {}
