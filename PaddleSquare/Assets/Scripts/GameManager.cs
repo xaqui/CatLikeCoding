@@ -9,13 +9,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Paddle paddleLeft, paddleRight;
 
-    [SerializeField] TextMeshPro TMP_ScoreLeft;
-    [SerializeField] TextMeshPro TMP_ScoreRight;
     [SerializeField] TextMeshPro TMP_MiddleText;
 
     bool isGameStarted = false;
-    int scoreLeft = 0;
-    int scoreRight = 0;
+
     int scoreToWin = 3;
 
     public static event Action OnGameStart;
@@ -26,19 +23,24 @@ public class GameManager : MonoBehaviour
                 StartNewGame();
             }
         }
+        if (Input.GetKeyDown(KeyCode.B)) {
+            if (!isGameStarted) {
+                //SpawnBall();
+            }
+        }
         if (isGameStarted) {
             ball.UpdateVisualization();
         }
     }
-    void StartNewGame() {
+
+    private void Awake() {
         TMP_MiddleText.gameObject.SetActive(false);
+    }
+    void StartNewGame() {
         isGameStarted = true;
         OnGameStart?.Invoke();
-        scoreLeft = 0;
-        scoreRight = 0;
-        TMP_ScoreLeft.SetText("0");
-        TMP_ScoreRight.SetText("0");
     }
+
     private void FixedUpdate() {
         if (isGameStarted) {
             paddleLeft.Move(ball.Position.y, Field.FieldSize.y / 2 + 1.5f);
@@ -52,10 +54,10 @@ public class GameManager : MonoBehaviour
 
     void EndGame() {
         TMP_MiddleText.gameObject.SetActive(true);
-        if(scoreLeft > scoreRight) {
+        if(paddleLeft.Score > paddleRight.Score) {
             // Left wins
             TMP_MiddleText.SetText("Left Wins!");
-        } else if (scoreLeft < scoreRight) {
+        } else if (paddleLeft.Score < paddleRight.Score) {
             // Right wins
             TMP_MiddleText.SetText("Right Wins!");
         } else {
@@ -71,8 +73,7 @@ public class GameManager : MonoBehaviour
         if (x < -xExtents) {
             // Goal for Paddle R
             ResetBallPosition();
-            AddScore(false);
-            if(scoreLeft >= scoreToWin || scoreRight >= scoreToWin) {
+            if(paddleRight.ScorePoint(scoreToWin)) {
                 EndGame();
             }
             return true;
@@ -80,8 +81,7 @@ public class GameManager : MonoBehaviour
         else if (x > xExtents) {
             // Goal for Paddle L
             ResetBallPosition();
-            AddScore(true);
-            if (scoreLeft >= scoreToWin || scoreRight >= scoreToWin) {
+            if (paddleLeft.ScorePoint(scoreToWin)) {
                 EndGame();
             }
             return true;
@@ -98,15 +98,6 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(delayInSeconds);
         ball.StartNewGame();
         yield return null;
-    }
-   void AddScore(bool isLeft) {
-        if(isLeft) {
-            scoreLeft++;
-            TMP_ScoreLeft.text = scoreLeft + "";
-        } else {
-            scoreRight++;
-            TMP_ScoreRight.text = scoreRight + "";
-        }
     }
     void BounceYIfNeeded(float y) {
         float yExtents = Field.FieldSize.y/2 - ball.Extents;
@@ -128,7 +119,7 @@ public class GameManager : MonoBehaviour
     }
     void BounceX(Paddle defender, Vector2 HitPoint, float HitFactor) {
         ball.BounceX(HitPoint.x);
-        ball.IncreaseSpeed(HitFactor *1.1f);
+        ball.IncreaseSpeed(HitFactor);
         defender.InitiateCooldown();
     }
 }
