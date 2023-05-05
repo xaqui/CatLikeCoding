@@ -1,11 +1,15 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] Ball ball;
+    [SerializeField] GameObject ballPrefab;
+    List<Ball> balls = new List<Ball>();
+    [SerializeField] Transform ballsContainer;
+
 
     [SerializeField] Paddle paddleLeft, paddleRight;
 
@@ -24,12 +28,39 @@ public class GameManager : MonoBehaviour
             }
         }
         if (Input.GetKeyDown(KeyCode.B)) {
-            if (!isGameStarted) {
-                //SpawnBall();
+            if (isGameStarted) {
+                SpawnBall(1f, Vector2.zero);
             }
         }
         if (isGameStarted) {
-            ball.UpdateVisualization();
+            foreach (Ball ball in balls) {
+                ball.UpdateVisualization();
+            }
+        }
+    }
+
+    public void SpawnBall(float delayInSeconds, Vector2 pos) {
+        Ball ballInstance = Instantiate(ballPrefab).GetComponent<Ball>();
+        ballInstance.transform.SetParent(ballsContainer);
+        balls.Add(ballInstance);
+        ballInstance.ResetBall();
+        StartCoroutine(BeginRoundAfterDelay(ballInstance, delayInSeconds));
+    }
+
+    public void LaunchBall(Vector2 pos, Vector2 velocity) {
+        Ball ballInstance = Instantiate(ballPrefab).GetComponent<Ball>();
+        ballInstance.transform.SetParent(ballsContainer);
+        balls.Add(ballInstance);
+        float bias = UnityEngine.Random.Range(-2f, 2f);
+        ballInstance.LaunchBall(pos+Vector2.right*2, new Vector2(velocity.x, velocity.y + bias));
+    }
+
+    void ClearAllBalls() {
+        balls.Clear();
+        int childCount = ballsContainer.childCount;
+        for (int i = childCount - 1; i >= 0; i--) {
+            GameObject child = ballsContainer.GetChild(i).gameObject;
+            Destroy(child);
         }
     }
 
@@ -37,19 +68,40 @@ public class GameManager : MonoBehaviour
         TMP_MiddleText.gameObject.SetActive(false);
     }
     void StartNewGame() {
+        ClearAllBalls();
+        TMP_MiddleText.gameObject.SetActive(false);
         isGameStarted = true;
         OnGameStart?.Invoke();
+        SpawnBall(1f, Vector2.zero);
     }
 
     private void FixedUpdate() {
         if (isGameStarted) {
-            paddleLeft.Move(ball.Position.y, Field.FieldSize.y / 2 + 1.5f);
-            paddleRight.Move(ball.Position.y, Field.FieldSize.y / 2 + 1.5f);
-            ball.Move();
-            BounceYIfNeeded(ball.Position.y);
-            BounceXIfNeeded(ball.Position);
-            CheckForGoal(ball.Position.x);
+            paddleLeft.UpdateHighPriorityTarget(balls);
+            paddleRight.UpdateHighPriorityTarget(balls);
+            paddleLeft.Move(Field.FieldSize.y / 2 + 1.5f);
+            paddleRight.Move(Field.FieldSize.y / 2 + 1.5f);
+            UpdateBalls();
+
         } 
+    }
+
+    private void UpdateBalls() {
+        if (balls.Count > 0) {
+            for (int i = balls.Count-1; i >= 0; i--) {
+                balls[i].Move();
+                if (paddleLeft.BounceXIfNeeded(balls[i])) {
+                    //LaunchBall(balls[i].Position, balls[i].Velocity);
+                    return;
+                }
+                if (paddleRight.BounceXIfNeeded(balls[i])) {
+                    return;
+                }
+                if (CheckForGoal(balls[i].Position.x, balls[i])) {
+                    return;
+                }
+            }
+        }
     }
 
     void EndGame() {
@@ -61,65 +113,44 @@ public class GameManager : MonoBehaviour
             // Right wins
             TMP_MiddleText.SetText("Right Wins!");
         } else {
-            // Tie
+            // Tie (?)
             TMP_MiddleText.SetText("Tie");
         }
-        ball.gameObject.SetActive(false);
+        ClearAllBalls();
         isGameStarted = false;
     }
 
-    bool CheckForGoal(float x) {
+    bool CheckForGoal(float x, Ball ball) {
         float xExtents = Field.FieldSize.x / 2 - ball.Extents;
         if (x < -xExtents) {
             // Goal for Paddle R
-            ResetBallPosition();
             if(paddleRight.ScorePoint(scoreToWin)) {
                 EndGame();
             }
+            ClearAllBalls();
+            SpawnBall(1f, Vector2.zero);
             return true;
         }
         else if (x > xExtents) {
             // Goal for Paddle L
-            ResetBallPosition();
             if (paddleLeft.ScorePoint(scoreToWin)) {
                 EndGame();
             }
+            ClearAllBalls();
+            SpawnBall(1f, Vector2.zero);
             return true;
         }
         return false;
     }
 
-    void ResetBallPosition() {
-        ball.ResetBall();
-        StartCoroutine(BeginRoundAfterDelay(1f));
-    }
 
-    IEnumerator BeginRoundAfterDelay(float delayInSeconds) {
+    IEnumerator BeginRoundAfterDelay(Ball ball, float delayInSeconds) {
         yield return new WaitForSeconds(delayInSeconds);
-        ball.StartNewGame();
+        if(ball != null) {
+            ball.StartNewGame();
+        }
         yield return null;
     }
-    void BounceYIfNeeded(float y) {
-        float yExtents = Field.FieldSize.y/2 - ball.Extents;
-        if (y < -yExtents) {
-            ball.BounceY(-yExtents);
-        }
-        else if (y > yExtents) {
-            ball.BounceY(yExtents);
-        }
-    }
-    void BounceXIfNeeded(Vector2 ballPosition) {
-        Vector2 HitPoint;
-        float HitFactor;
-        if (paddleLeft.HitBall(ballPosition, ball.Extents,out HitPoint, out HitFactor)) {
-            BounceX(paddleLeft, HitPoint, HitFactor);
-        } else if(paddleRight.HitBall(ballPosition, ball.Extents, out HitPoint, out HitFactor)) {
-            BounceX(paddleRight, HitPoint, HitFactor);
-        }
-    }
-    void BounceX(Paddle defender, Vector2 HitPoint, float HitFactor) {
-        ball.BounceX(HitPoint.x);
-        ball.IncreaseSpeed(HitFactor);
-        defender.InitiateCooldown();
-    }
+
+    
 }

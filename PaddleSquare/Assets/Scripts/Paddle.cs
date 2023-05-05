@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
+using Unity.Burst.Intrinsics;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 public abstract class Paddle : MonoBehaviour
 {
@@ -24,6 +26,11 @@ public abstract class Paddle : MonoBehaviour
     bool isActive = true;
     public int Score { get; private set; } = 0;
 
+
+    Ball target;
+    Vector2 WallPosition2D => new Vector2(Wall.position.x, Wall.position.z);
+
+
     static readonly int
         emissionColorId = Shader.PropertyToID("_EmissionColor"),
         faceColorId = Shader.PropertyToID("_FaceColor"),
@@ -32,7 +39,7 @@ public abstract class Paddle : MonoBehaviour
     Vector2 extents => new Vector2(transform.localScale.x, transform.localScale.z);
 
     void ChangeTargetingBias() =>
-        targetingBias = Random.Range(-maxTargetingBias, maxTargetingBias);
+        targetingBias = UnityEngine.Random.Range(-maxTargetingBias, maxTargetingBias);
     private void Awake() {
         TMP_Score.gameObject.SetActive(false);
         GameManager.OnGameStart += Setup;
@@ -45,6 +52,33 @@ public abstract class Paddle : MonoBehaviour
     }
     abstract protected void AlignToWall();
     abstract protected float AdjustByPlayer(float y);
+
+
+    public void UpdateHighPriorityTarget(List<Ball> balls) {
+        if (balls == null) {
+            target = null;
+            return;
+        }
+        if (balls.Count == 0) {
+            target = null;
+            return;
+        }
+        if (balls.Count == 1) {
+            target = balls[0];
+            return;
+        }
+        int index = 0;
+        float minDistance = 9999;
+
+        for (int i = 0; i < balls.Count; i++) {
+            float distance = Vector2.Distance(balls[i].Position, WallPosition2D);
+            if (distance< minDistance) {
+                minDistance = distance;
+                index = i;
+            }
+        }
+        target = balls[index];
+    }
     protected void Setup() {
         AlignToWall();
         ChangeTargetingBias();
@@ -59,16 +93,23 @@ public abstract class Paddle : MonoBehaviour
         scoreMaterial.SetColor(faceColorId, Color.white *1.5f);
     }
 
-    public void Move(float target, float arenaExtents) {
+    public void Move(float arenaExtents) {
         Vector3 p = transform.localPosition;
-        p.z = isAI ? AdjustByAI(p.z, target) : AdjustByPlayer(p.z);
+        if (isAI) {
+            if(target != null) {
+                p.z = AdjustByAI(p.z, target.Position.y);
+            }
+        } else {
+            p.z = AdjustByPlayer(p.z);
+        }
+           
         float limit = arenaExtents - extents.y;
         p.z = Mathf.Clamp(p.z, -limit, limit);
         transform.localPosition = p;
     }
 
     float AdjustByAI(float y, float target) {
-        target += targetingBias * extents.y;
+        target += targetingBias;
         if (y < target) {
             return Mathf.Min(y + speed * Time.deltaTime, target);
         }
@@ -121,6 +162,21 @@ public abstract class Paddle : MonoBehaviour
 
     private void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(extents.x, 1, extents.y));
+    }
+
+
+    public bool BounceXIfNeeded(Ball ball) {
+        Vector2 HitPoint;
+        float HitFactor;
+        if (HitBall(ball.Position, ball.Extents, out HitPoint, out HitFactor)) {
+            BounceX(HitPoint, HitFactor, ball);
+            return true;
+        }
+        return false;
+    }
+    void BounceX(Vector2 HitPoint, float HitFactor, Ball ball) {
+        ball.BounceX(HitPoint.x);
+        ball.IncreaseSpeed(HitFactor);
     }
 
 }
