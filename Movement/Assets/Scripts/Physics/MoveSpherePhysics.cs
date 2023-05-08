@@ -24,8 +24,9 @@ public class MoveSpherePhysics : MonoBehaviour
     LayerMask probeMask = -1, stairsMask = -1;
 
     Vector3 upAxis, rightAxis, forwardAxis;
-    Vector3 velocity, desiredVelocity;
-    Rigidbody body;
+    Vector3 velocity, desiredVelocity, connectionVelocity;
+    Rigidbody body, connectedBody, previousConnectedBody;
+    Vector3 connectionWorldPosition, connectionLocalPosition;
     bool desiredJump;
     int jumpPhase;
     float minGroundDotProduct, minStairsDotProduct;
@@ -102,6 +103,8 @@ public class MoveSpherePhysics : MonoBehaviour
         if (dot > 0f) {
             velocity = (velocity - hit.normal * dot).normalized * speed;
         }
+        connectedBody = hit.rigidbody;
+        Debug.Log(connectedBody);
         return true;
     }
     void UpdateState() {
@@ -119,10 +122,30 @@ public class MoveSpherePhysics : MonoBehaviour
         } else {
             contactNormal = upAxis;
         }
+        if (connectedBody) {
+            Debug.Log(connectedBody);
+            if (connectedBody.isKinematic || connectedBody.mass >= body.mass) {
+                UpdateConnectionState();
+            }
+        }
+    }
+    void UpdateConnectionState() {
+        if (connectedBody == previousConnectedBody) {
+            Vector3 connectionMovement =
+                connectedBody.transform.TransformPoint(connectionLocalPosition) -
+                connectionWorldPosition;
+            connectionVelocity = connectionMovement / Time.deltaTime;
+        }
+        connectionWorldPosition = body.position;
+        connectionLocalPosition = connectedBody.transform.InverseTransformPoint(
+            connectionWorldPosition
+        );
     }
     void ClearState() {
         groundContactCount = steepContactCount = 0;
-        contactNormal = steepNormal = Vector3.zero;
+        contactNormal = steepNormal = connectionVelocity = Vector3.zero;
+        previousConnectedBody = connectedBody;
+        connectedBody = null;
     }
     void Jump(Vector3 gravity) {
         Vector3 jumpDirection;
@@ -166,11 +189,15 @@ public class MoveSpherePhysics : MonoBehaviour
             if (upDot >= minDot) {
                 groundContactCount += 1;
                 contactNormal += normal;
+                connectedBody = collision.rigidbody;
             }
             // No ground contact, check for steepness
             else if (upDot > -0.01f) {
                 steepContactCount += 1;
                 steepNormal += normal;
+                if (groundContactCount == 0) {
+                    connectedBody = collision.rigidbody;
+                }
             }
         }
     }
@@ -185,8 +212,9 @@ public class MoveSpherePhysics : MonoBehaviour
         Vector3 xAxis = ProjectDirectionOnPlane(rightAxis, contactNormal);
         Vector3 zAxis = ProjectDirectionOnPlane(forwardAxis, contactNormal);
 
-        float currentX = Vector3.Dot(velocity, xAxis);
-        float currentZ = Vector3.Dot(velocity, zAxis);
+        Vector3 relativeVelocity = velocity - connectionVelocity;
+        float currentX = Vector3.Dot(relativeVelocity, xAxis);
+        float currentZ = Vector3.Dot(relativeVelocity, zAxis);
 
         float acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
         float maxSpeedChange = acceleration * Time.deltaTime;
