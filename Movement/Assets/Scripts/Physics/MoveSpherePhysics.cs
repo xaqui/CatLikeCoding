@@ -12,6 +12,10 @@ public class MoveSpherePhysics : MonoBehaviour
     float jumpHeight = 2f;
     [SerializeField, Range(0, 5)]
     int maxAirJumps = 0;
+    [SerializeField, Range(90, 180)]
+    float maxClimbAngle = 140f;
+    [SerializeField]
+    Material normalMaterial = default, climbingMaterial = default;
 
     [Header("Ground Snapping Settings Parameters")]
     [SerializeField, Range(0f, 90f)]
@@ -21,7 +25,7 @@ public class MoveSpherePhysics : MonoBehaviour
     [SerializeField, Min(0f)]
     float probeDistance = 1f;
     [SerializeField]
-    LayerMask probeMask = -1, stairsMask = -1;
+    LayerMask probeMask = -1, stairsMask = -1, climbMask = -1;
 
     Vector3 upAxis, rightAxis, forwardAxis;
     Vector3 velocity, desiredVelocity, connectionVelocity;
@@ -29,23 +33,29 @@ public class MoveSpherePhysics : MonoBehaviour
     Vector3 connectionWorldPosition, connectionLocalPosition;
     bool desiredJump;
     int jumpPhase;
-    float minGroundDotProduct, minStairsDotProduct;
-    Vector3 contactNormal, steepNormal;
-    int groundContactCount, steepContactCount;
+    float minGroundDotProduct, minStairsDotProduct, minClimbDotProduct;
+    Vector3 contactNormal, steepNormal, climbNormal;
+    int groundContactCount, steepContactCount, climbContactCount;
     int stepsSinceLastGrounded, stepsSinceLastJump;
 
     bool OnGround => groundContactCount > 0;
     bool OnSteep => steepContactCount > 0;
+    bool Climbing => climbContactCount > 0;
+
+    MeshRenderer meshRenderer;
 
     void OnValidate() {
         minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
         minStairsDotProduct = Mathf.Cos(maxStairsAngle * Mathf.Deg2Rad);
+        minClimbDotProduct = Mathf.Cos(maxClimbAngle * Mathf.Deg2Rad);
     }
     void Awake() {
         body = GetComponent<Rigidbody>();
         // Disable Unity standard gravity to override with our custom gravity
         body.useGravity = false;
+        meshRenderer = GetComponent<MeshRenderer>();
         OnValidate();
+        
     }
 
     void Update() {
@@ -65,6 +75,7 @@ public class MoveSpherePhysics : MonoBehaviour
         }
         desiredVelocity = new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
         desiredJump |= Input.GetButtonDown("Jump");
+        meshRenderer.material = Climbing ? climbingMaterial : normalMaterial;
     }
 
   
@@ -142,8 +153,8 @@ public class MoveSpherePhysics : MonoBehaviour
         );
     }
     void ClearState() {
-        groundContactCount = steepContactCount = 0;
-        contactNormal = steepNormal = connectionVelocity = Vector3.zero;
+        groundContactCount = steepContactCount = climbContactCount = 0;
+        contactNormal = steepNormal = climbNormal = Vector3.zero;
         previousConnectedBody = connectedBody;
         connectedBody = null;
     }
@@ -181,7 +192,8 @@ public class MoveSpherePhysics : MonoBehaviour
         EvaluateCollision(collision);
     }
     void EvaluateCollision(Collision collision) {
-        float minDot = GetMinDot(collision.gameObject.layer);
+        int layer = collision.gameObject.layer;
+        float minDot = GetMinDot(layer);
         for (int i = 0; i < collision.contactCount; i++) {
             Vector3 normal = collision.GetContact(i).normal;
             float upDot = Vector3.Dot(upAxis, normal);
@@ -192,10 +204,18 @@ public class MoveSpherePhysics : MonoBehaviour
                 connectedBody = collision.rigidbody;
             }
             // No ground contact, check for steepness
-            else if (upDot > -0.01f) {
-                steepContactCount += 1;
-                steepNormal += normal;
-                if (groundContactCount == 0) {
+            else {
+                if (upDot > -0.01f) {
+                    steepContactCount += 1;
+                    steepNormal += normal;
+                    if (groundContactCount == 0) {
+                        connectedBody = collision.rigidbody;
+                    }
+                }
+                if (upDot >= minClimbDotProduct &&
+                    (climbMask & (1 << layer)) != 0 ) {
+                    climbContactCount += 1;
+                    climbNormal += normal;
                     connectedBody = collision.rigidbody;
                 }
             }
