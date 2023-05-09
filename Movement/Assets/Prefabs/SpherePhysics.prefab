@@ -222,19 +222,23 @@ MonoBehaviour:
   maxClimbAngle: 140
   normalMaterial: {fileID: 2100000, guid: 71d77cc47e50b3544aaa13e7916293b6, type: 2}
   climbingMaterial: {fileID: 2100000, guid: 2677685ec8453404ea2a52d5406f1fb0, type: 2}
+  swimmingMaterial: {fileID: 2100000, guid: 3f2f8d36015906c4bbbc6743c6abbe9b, type: 2}
   maxGroundAngle: 30
   maxStairsAngle: 50
   maxSnapSpeed: 100
   probeDistance: 1
   probeMask:
     serializedVersion: 2
-    m_Bits: 1075
+    m_Bits: 1059
   stairsMask:
     serializedVersion: 2
     m_Bits: 1024
   climbMask:
     serializedVersion: 2
     m_Bits: 1827
+  waterMask:
+    serializedVersion: 2
+    m_Bits: 16
 --- !u!54 &8511068319853520014
 Rigidbody:
   m_ObjectHideFlags: 0

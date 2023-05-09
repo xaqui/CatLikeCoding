@@ -15,7 +15,9 @@ public class MoveSpherePhysics : MonoBehaviour
     [SerializeField, Range(90, 180)]
     float maxClimbAngle = 140f;
     [SerializeField]
-    Material normalMaterial = default, climbingMaterial = default;
+    Material normalMaterial = default, 
+        climbingMaterial = default,
+        swimmingMaterial = default;
 
     [Header("Ground Snapping Settings Parameters")]
     [SerializeField, Range(0f, 90f)]
@@ -25,7 +27,7 @@ public class MoveSpherePhysics : MonoBehaviour
     [SerializeField, Min(0f)]
     float probeDistance = 1f;
     [SerializeField]
-    LayerMask probeMask = -1, stairsMask = -1, climbMask = -1;
+    LayerMask probeMask = -1, stairsMask = -1, climbMask = -1, waterMask = 0;
 
     Vector2 playerInput;
     Vector3 upAxis, rightAxis, forwardAxis;
@@ -38,6 +40,7 @@ public class MoveSpherePhysics : MonoBehaviour
     Vector3 contactNormal, steepNormal, climbNormal, lastClimbNormal;
     int groundContactCount, steepContactCount, climbContactCount;
     int stepsSinceLastGrounded, stepsSinceLastJump;
+    bool InWater { get; set; }
 
     bool OnGround => groundContactCount > 0;
     bool OnSteep => steepContactCount > 0;
@@ -76,7 +79,8 @@ public class MoveSpherePhysics : MonoBehaviour
 
         desiredJump |= Input.GetButtonDown("Jump");
         desiresClimbing = Input.GetButton("Climb");
-        meshRenderer.material = Climbing ? climbingMaterial : normalMaterial;
+        meshRenderer.material = Climbing ? climbingMaterial : 
+            InWater ? swimmingMaterial : normalMaterial;
     }
 
   
@@ -117,7 +121,8 @@ public class MoveSpherePhysics : MonoBehaviour
         if (speed > maxSnapSpeed) {
             return false;
         }
-        if (!Physics.Raycast(body.position, -upAxis, out RaycastHit hit, probeDistance, probeMask)) {
+        if (!Physics.Raycast(body.position, -upAxis, out RaycastHit hit, 
+            probeDistance, probeMask, QueryTriggerInteraction.Ignore)) {
             return false;
         }
         float upDot = Vector3.Dot(upAxis, hit.normal);
@@ -131,7 +136,6 @@ public class MoveSpherePhysics : MonoBehaviour
             velocity = (velocity - hit.normal * dot).normalized * speed;
         }
         connectedBody = hit.rigidbody;
-        Debug.Log(connectedBody);
         return true;
     }
     void UpdateState() {
@@ -173,6 +177,7 @@ public class MoveSpherePhysics : MonoBehaviour
         contactNormal = steepNormal = climbNormal = Vector3.zero;
         previousConnectedBody = connectedBody;
         connectedBody = null;
+        InWater = false;
     }
     void Jump(Vector3 gravity) {
         Vector3 jumpDirection;
@@ -200,6 +205,16 @@ public class MoveSpherePhysics : MonoBehaviour
         }
         velocity += jumpDirection * jumpSpeed;
 
+    }
+    void OnTriggerEnter(Collider other) {
+        if ((waterMask & (1 << other.gameObject.layer)) != 0) {
+            InWater = true;
+        }
+    }
+    void OnTriggerStay(Collider other) {
+        if ((waterMask & (1 << other.gameObject.layer)) != 0) {
+            InWater = true;
+        }
     }
     void OnCollisionStay(Collision collision) {
         EvaluateCollision(collision);
