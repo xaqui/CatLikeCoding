@@ -35,6 +35,9 @@ public class Ball : MonoBehaviour
     [SerializeField]
     Light PointLight;
 
+    [SerializeField]
+    AudioSource HitSound;
+
     Material ballMaterial;
 
     Vector2 position, velocity;
@@ -61,13 +64,12 @@ public class Ball : MonoBehaviour
         }
     }
 
-
     public void StartNewGame() {
         isLive = true;
-        
         UpdateVisualization();
         velocity.y = Random.Range(-maxStartYSpeed, maxStartYSpeed);
-        velocity.x = -constantXSpeed;
+
+        velocity.x = (Random.Range(0, 2) * 2 - 1) * constantXSpeed;
     }
     public void ResetBall() {
         SetTrailEmission(false);
@@ -78,7 +80,6 @@ public class Ball : MonoBehaviour
         trailParticleSystem.Play();
         RandomizeParticlesColor();
     }
-
     public void LaunchBall(Vector2 pos, Vector2 vel) {
         SetTrailEmission(false);
         position = pos;
@@ -89,7 +90,6 @@ public class Ball : MonoBehaviour
         RandomizeParticlesColor();
         isLive = true;
     }
-
     public void IncreaseSpeed(float speedFactor) {
         float velocityY = maxYSpeed * speedFactor;
         if(velocityY == 0) {
@@ -97,9 +97,7 @@ public class Ball : MonoBehaviour
         }
         velocity.x += .3f;
         velocity.y = velocityY;
-        
     }
-
     public void CalculateBounceTime() {
         if(stepsSinceLastBounce < 10) {
             canCollide = false;
@@ -117,11 +115,10 @@ public class Ball : MonoBehaviour
                 position.y,
                 boundary < 0f ? 90f : 270f
             );
+            HitSound.Play();
             RandomizeParticlesColor();
         }
     }
-
-
 
     public void BounceY(float boundary) {
         stepsSinceLastBounce = 0;

@@ -10,7 +10,7 @@ public class Field : MonoBehaviour
     [SerializeField] GameObject NegXWall;
     [SerializeField] GameObject Net;
 
-    public static readonly Vector2 FieldSize = new Vector2(40f,24f);
+    public static readonly Vector2 FieldSize = new Vector2(48f,24f);
 
     private void Awake() {
         CalculateFieldBounds();

@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 public abstract class Paddle : MonoBehaviour
@@ -71,7 +69,8 @@ public abstract class Paddle : MonoBehaviour
         float minDistance = 9999;
 
         for (int i = 0; i < balls.Count; i++) {
-            float distance = Vector2.Distance(balls[i].Position, WallPosition2D);
+            float distance = Mathf.Abs(WallPosition2D.x - balls[i].Position.x);
+            //float distance = Vector2.Distance(balls[i].Position, WallPosition2D);
             if (distance< minDistance) {
                 minDistance = distance;
                 index = i;
@@ -117,7 +116,7 @@ public abstract class Paddle : MonoBehaviour
     }
     public void InitiateCooldown() {
         if (isActive) {
-            StartCoroutine(Cooldown(.5f));
+            //StartCoroutine(Cooldown(.5f));
         }
     }
     IEnumerator Cooldown(float timeInSeconds) {
@@ -133,8 +132,8 @@ public abstract class Paddle : MonoBehaviour
             ((ballPosition - paddlePosition2D) /
             (extents + new Vector2(ballExtents, ballExtents))).y;
 
-        Vector2 rectMin = paddlePosition2D - extents/2;
-        Vector2 rectMax = paddlePosition2D + extents/2;
+        Vector2 rectMin = paddlePosition2D - (extents*1.2f)/2;
+        Vector2 rectMax = paddlePosition2D + (extents*1.2f)/2;
 
         float closestX = Mathf.Clamp(ballPosition.x, rectMin.x, rectMax.x);
         float closestY = Mathf.Clamp(ballPosition.y, rectMin.y, rectMax.y);
@@ -158,12 +157,9 @@ public abstract class Paddle : MonoBehaviour
         return Score >= pointsToWin;
     }
 
-    
-
     private void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(extents.x, 1, extents.y));
     }
-
 
     public bool BounceXIfNeeded(Ball ball) {
         Vector2 HitPoint;

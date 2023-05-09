@@ -680,7 +680,7 @@ MonoBehaviour:
   goalColor: {r: 8, g: 0.09411765, b: 0, a: 1}
   isAI: 0
   speed: 30
-  maxTargetingBias: 1
+  maxTargetingBias: 0.5
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1676,8 +1676,8 @@ MonoBehaviour:
   TMP_Score: {fileID: 191087274}
   goalColor: {r: 8, g: 0.09411765, b: 0, a: 1}
   isAI: 1
-  speed: 30
-  maxTargetingBias: 1
+  speed: 999
+  maxTargetingBias: 0.5
 --- !u!1 &1990131518
 GameObject:
   m_ObjectHideFlags: 0
