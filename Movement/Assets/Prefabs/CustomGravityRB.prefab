@@ -128,3 +128,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   floatToSleep: 1
+  submergenceOffset: 0.125
+  submergenceRange: 0.25
+  buoyancy: 1.1
+  waterDrag: 1
+  buoyancyOffset: {x: 0, y: 0.01, z: 0}
+  waterMask:
+    serializedVersion: 2
+    m_Bits: 16

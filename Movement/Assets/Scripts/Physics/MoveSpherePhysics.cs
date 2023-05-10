@@ -186,7 +186,6 @@ public class MoveSpherePhysics : MonoBehaviour
             contactNormal = upAxis;
         }
         if (connectedBody) {
-            Debug.Log(connectedBody);
             if (connectedBody.isKinematic || connectedBody.mass >= body.mass) {
                 UpdateConnectionState();
             }
