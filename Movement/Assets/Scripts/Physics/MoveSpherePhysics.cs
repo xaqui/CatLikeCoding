@@ -18,6 +18,14 @@ public class MoveSpherePhysics : MonoBehaviour
     Material normalMaterial = default, 
         climbingMaterial = default,
         swimmingMaterial = default;
+    [SerializeField]
+    float submergenceOffset = 0.5f;
+    [SerializeField, Min(0.1f)]
+    float submergenceRange = 1f;
+    [SerializeField, Range(0f, 10f)]
+    float waterDrag = 1f;
+    [SerializeField, Min(0f)]
+    float buoyancy = 1.5f;
 
     [Header("Ground Snapping Settings Parameters")]
     [SerializeField, Range(0f, 90f)]
@@ -40,8 +48,9 @@ public class MoveSpherePhysics : MonoBehaviour
     Vector3 contactNormal, steepNormal, climbNormal, lastClimbNormal;
     int groundContactCount, steepContactCount, climbContactCount;
     int stepsSinceLastGrounded, stepsSinceLastJump;
-    bool InWater { get; set; }
+    float submergence;
 
+    bool InWater => submergence > 0f;
     bool OnGround => groundContactCount > 0;
     bool OnSteep => steepContactCount > 0;
     bool Climbing => climbContactCount > 0 && stepsSinceLastJump > 2;
@@ -59,7 +68,6 @@ public class MoveSpherePhysics : MonoBehaviour
         body.useGravity = false;
         meshRenderer = GetComponent<MeshRenderer>();
         OnValidate();
-        
     }
 
     void Update() {
@@ -81,12 +89,18 @@ public class MoveSpherePhysics : MonoBehaviour
         desiresClimbing = Input.GetButton("Climb");
         meshRenderer.material = Climbing ? climbingMaterial : 
             InWater ? swimmingMaterial : normalMaterial;
+        //meshRenderer.material.color = Color.white * submergence;
     }
 
   
     private void FixedUpdate() {
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
         UpdateState();
+
+        if (InWater) {
+            velocity *= 1f - waterDrag * submergence * Time.deltaTime;
+        }
+
         AdjustVelocity();
         if (desiredJump) {
             desiredJump = false;
@@ -95,6 +109,10 @@ public class MoveSpherePhysics : MonoBehaviour
 
         if (Climbing) {
             velocity -= contactNormal * (maxClimbAcceleration * 0.9f * Time.deltaTime);
+        }
+        else if (InWater) {
+            velocity +=
+                gravity * ((1f - buoyancy * submergence) * Time.deltaTime);
         }
         else if (OnGround && velocity.sqrMagnitude < 0.01f) {
             velocity +=
@@ -114,7 +132,7 @@ public class MoveSpherePhysics : MonoBehaviour
         ClearState();
     }
     bool SnapToGround() {
-        if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2) {
+        if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2 || InWater) {
             return false;
         }
         float speed = velocity.magnitude;
@@ -177,7 +195,7 @@ public class MoveSpherePhysics : MonoBehaviour
         contactNormal = steepNormal = climbNormal = Vector3.zero;
         previousConnectedBody = connectedBody;
         connectedBody = null;
-        InWater = false;
+        submergence = 0f;
     }
     void Jump(Vector3 gravity) {
         Vector3 jumpDirection;
@@ -206,14 +224,26 @@ public class MoveSpherePhysics : MonoBehaviour
         velocity += jumpDirection * jumpSpeed;
 
     }
+    void EvaluateSubmergence() {
+        if (Physics.Raycast(
+            body.position + upAxis * submergenceOffset,
+            -upAxis, out RaycastHit hit, submergenceRange +1f,
+            waterMask, QueryTriggerInteraction.Collide
+        )) {
+            submergence = 1f - hit.distance / submergenceRange;
+        }
+        else {
+            submergence = 1f;
+        }
+    }
     void OnTriggerEnter(Collider other) {
         if ((waterMask & (1 << other.gameObject.layer)) != 0) {
-            InWater = true;
+            EvaluateSubmergence();
         }
     }
     void OnTriggerStay(Collider other) {
         if ((waterMask & (1 << other.gameObject.layer)) != 0) {
-            InWater = true;
+            EvaluateSubmergence();
         }
     }
     void OnCollisionStay(Collision collision) {
