@@ -76,7 +76,6 @@ public class MoveSpherePhysics : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         OnValidate();
     }
-
     void Update() {
         //GetComponent<Renderer>().material.SetColor("_Color", Color.white * (groundContactCount * 0.25f));
         //GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
@@ -105,8 +104,6 @@ public class MoveSpherePhysics : MonoBehaviour
                 Swimming ? swimmingMaterial : normalMaterial;
         //meshRenderer.material.color = Color.white * submergence;
     }
-
-  
     private void FixedUpdate() {
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
         UpdateState();
@@ -169,6 +166,9 @@ public class MoveSpherePhysics : MonoBehaviour
         }
         connectedBody = hit.rigidbody;
         return true;
+    }
+    public void PreventSnapToGround() {
+        stepsSinceLastJump = -1;
     }
     void UpdateState() {
         stepsSinceLastGrounded += 1;
