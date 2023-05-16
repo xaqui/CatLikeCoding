@@ -77,6 +77,9 @@ public class MoveSpherePhysics : MonoBehaviour
         OnValidate();
     }
     void Update() {
+        if (Input.GetKeyDown(KeyCode.M)) {
+            body.velocity = Vector3.zero;
+        }
         //GetComponent<Renderer>().material.SetColor("_Color", Color.white * (groundContactCount * 0.25f));
         //GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
         playerInput.x = Input.GetAxis("Horizontal");
@@ -143,14 +146,15 @@ public class MoveSpherePhysics : MonoBehaviour
         ClearState();
     }
     bool SnapToGround() {
-        if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2) {
+        if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2 || InWater) {
             return false;
         }
         float speed = velocity.magnitude;
         if (speed > maxSnapSpeed) {
             return false;
         }
-        if (!Physics.Raycast(body.position, -upAxis, out RaycastHit hit, 
+        if (!Physics.Raycast(
+            body.position, -upAxis, out RaycastHit hit,
             probeDistance, probeMask, QueryTriggerInteraction.Ignore)) {
             return false;
         }
@@ -206,6 +210,7 @@ public class MoveSpherePhysics : MonoBehaviour
     void ClearState() {
         groundContactCount = steepContactCount = climbContactCount = 0;
         contactNormal = steepNormal = climbNormal = Vector3.zero;
+        connectionVelocity = Vector3.zero;
         previousConnectedBody = connectedBody;
         connectedBody = null;
         submergence = 0f;
