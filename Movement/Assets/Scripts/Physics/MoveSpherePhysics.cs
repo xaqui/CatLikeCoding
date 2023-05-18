@@ -3,7 +3,7 @@ using UnityEngine;
 public class MoveSpherePhysics : MonoBehaviour
 {
     [SerializeField]
-    Transform playerInputSpace = default;
+    Transform playerInputSpace = default, ball = default;
     [SerializeField, Range(0f, 100f)]
     float maxSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
     [SerializeField, Range(0f, 100f)]
@@ -21,6 +21,8 @@ public class MoveSpherePhysics : MonoBehaviour
     Material normalMaterial = default, 
         climbingMaterial = default,
         swimmingMaterial = default;
+    [SerializeField, Min(0.1f)]
+    float ballRadius = 0.5f;
     [SerializeField]
     float submergenceOffset = 0.5f;
     [SerializeField, Min(0.1f)]
@@ -73,18 +75,16 @@ public class MoveSpherePhysics : MonoBehaviour
         body = GetComponent<Rigidbody>();
         // Disable Unity standard gravity to override with our custom gravity
         body.useGravity = false;
-        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer = ball.GetComponent<MeshRenderer>();
         OnValidate();
     }
     void Update() {
         if (Input.GetKeyDown(KeyCode.M)) {
             body.velocity = Vector3.zero;
         }
-        //GetComponent<Renderer>().material.SetColor("_Color", Color.white * (groundContactCount * 0.25f));
-        //GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
         playerInput.x = Input.GetAxis("Horizontal");
-        playerInput.y = Input.GetAxis("Vertical");
-        playerInput.z = Swimming ? Input.GetAxis("UpDown") : 0f;
+        playerInput.z = Input.GetAxis("Vertical");
+        playerInput.y = Swimming ? Input.GetAxis("UpDown") : 0f;
         playerInput = Vector3.ClampMagnitude(playerInput, 1f);
         if (playerInputSpace) {
             rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, upAxis);
@@ -102,10 +102,7 @@ public class MoveSpherePhysics : MonoBehaviour
             desiredJump |= Input.GetButtonDown("Jump");
             desiresClimbing = Input.GetButton("Climb");
         }
-        meshRenderer.material =
-                Climbing ? climbingMaterial :
-                Swimming ? swimmingMaterial : normalMaterial;
-        //meshRenderer.material.color = Color.white * submergence;
+        UpdateBall();
     }
     private void FixedUpdate() {
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
@@ -144,6 +141,22 @@ public class MoveSpherePhysics : MonoBehaviour
 
         body.velocity = velocity;
         ClearState();
+    }
+
+    void UpdateBall() {
+        Material ballMaterial = normalMaterial;
+        if (Climbing) {
+            ballMaterial = climbingMaterial;
+        }
+        else if (Swimming) {
+            ballMaterial = swimmingMaterial;
+        }
+        meshRenderer.material = ballMaterial;
+        Vector3 movement = body.velocity * Time.deltaTime;
+        float distance = movement.magnitude;
+        float angle = distance * (180f / Mathf.PI) / ballRadius;
+        ball.localRotation =
+            Quaternion.Euler(Vector3.right * angle) * ball.localRotation;
     }
     bool SnapToGround() {
         if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2 || InWater) {
@@ -346,21 +359,18 @@ public class MoveSpherePhysics : MonoBehaviour
         zAxis = ProjectDirectionOnPlane(zAxis, contactNormal);
 
         Vector3 relativeVelocity = velocity - connectionVelocity;
-        float currentX = Vector3.Dot(relativeVelocity, xAxis);
-        float currentZ = Vector3.Dot(relativeVelocity, zAxis);
+        Vector3 adjustment;
+        adjustment.x = playerInput.x * speed - Vector3.Dot(relativeVelocity, xAxis);
+        adjustment.z = playerInput.z * speed - Vector3.Dot(relativeVelocity, zAxis);
+        adjustment.y = Swimming ? playerInput.y * speed - Vector3.Dot(relativeVelocity, upAxis) : 0f;
 
-        float maxSpeedChange = acceleration * Time.deltaTime;
 
-        float newX = Mathf.MoveTowards(currentX, playerInput.x * speed, maxSpeedChange);
-        float newZ = Mathf.MoveTowards(currentZ, playerInput.y * speed, maxSpeedChange);
+        adjustment = Vector3.ClampMagnitude(adjustment, acceleration * Time.deltaTime);
 
-        velocity += xAxis * (newX - currentX) + zAxis * (newZ - currentZ);
+        velocity += xAxis * adjustment.x + zAxis * adjustment.z;
+
         if (Swimming) {
-            float currentY = Vector3.Dot(relativeVelocity, upAxis);
-            float newY = Mathf.MoveTowards(
-                currentY, playerInput.z * speed, maxSpeedChange
-            );
-            velocity += upAxis * (newY - currentY);
+            velocity += upAxis * adjustment.y;
         }
     }
     bool CheckSteepContacts() {
