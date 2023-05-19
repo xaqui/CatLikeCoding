@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7899741719970177558}
   - component: {fileID: 8424043115900640498}
   - component: {fileID: 3944277342207639755}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Ball
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -273,6 +273,9 @@ MonoBehaviour:
   climbingMaterial: {fileID: 2100000, guid: 2677685ec8453404ea2a52d5406f1fb0, type: 2}
   swimmingMaterial: {fileID: 2100000, guid: 3f2f8d36015906c4bbbc6743c6abbe9b, type: 2}
   ballRadius: 0.5
+  ballAlignSpeed: 180
+  ballAirRotation: 0.5
+  ballSwimRotation: 2
   submergenceOffset: 0.5
   submergenceRange: 1
   waterDrag: 1

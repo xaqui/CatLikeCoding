@@ -25,6 +25,10 @@ public class MoveSpherePhysics : MonoBehaviour
     float ballRadius = 0.5f;
     [SerializeField, Min(0f)]
     float ballAlignSpeed = 180f;
+    [SerializeField, Min(0f)]
+    float
+        ballAirRotation = 0.5f,
+        ballSwimRotation = 2f;
     [SerializeField]
     float submergenceOffset = 0.5f;
     [SerializeField, Min(0.1f)]
@@ -49,7 +53,7 @@ public class MoveSpherePhysics : MonoBehaviour
 
     Vector3 playerInput;
     Vector3 upAxis, rightAxis, forwardAxis;
-    Vector3 velocity, connectionVelocity;
+    Vector3 velocity, connectionVelocity, lastConnectionVelocity;
     Rigidbody body, connectedBody, previousConnectedBody;
     Vector3 connectionWorldPosition, connectionLocalPosition;
     bool desiredJump, desiresClimbing;
@@ -148,25 +152,39 @@ public class MoveSpherePhysics : MonoBehaviour
     void UpdateBall() {
         Material ballMaterial = normalMaterial;
         Vector3 rotationPlaneNormal = lastContactNormal;
+        float rotationFactor = 1f;
         if (Climbing) {
             ballMaterial = climbingMaterial;
+            rotationFactor = ballSwimRotation;
         } else if (Swimming) {
             ballMaterial = swimmingMaterial;
         } else if (!OnGround) {
             if (OnSteep) {
                 rotationPlaneNormal = lastSteepNormal;
+            } else {
+                rotationFactor = ballAirRotation;
             }
         }
         meshRenderer.material = ballMaterial;
-        Vector3 movement = body.velocity * Time.deltaTime;
+        Vector3 movement = (body.velocity - lastConnectionVelocity) * Time.deltaTime;
         movement -= rotationPlaneNormal * Vector3.Dot(movement, rotationPlaneNormal);
         float distance = movement.magnitude;
-        if (distance < 0.001f) {
+        Quaternion rotation = ball.localRotation;
+        if (connectedBody && connectedBody == previousConnectedBody) {
+            rotation = Quaternion.Euler(
+                connectedBody.angularVelocity * (Mathf.Rad2Deg * Time.deltaTime)
+            ) * rotation;
+            if (distance < 0.001f) {
+                ball.localRotation = rotation;
+                return;
+            }
+        }
+        else if(distance < 0.001f) {
             return; // Abort if there is very little movement that frame
         }
-        float angle = distance * (180f / Mathf.PI) / ballRadius;
+        float angle = distance * rotationFactor * (180f / Mathf.PI) / ballRadius;
         Vector3 rotationAxis = Vector3.Cross(rotationPlaneNormal, movement).normalized;
-        Quaternion rotation = Quaternion.Euler(rotationAxis * angle) * ball.localRotation;
+        rotation = Quaternion.Euler(rotationAxis * angle) * rotation;
         if (ballAlignSpeed > 0f) {
             rotation = AlignBallRotation(rotationAxis, rotation, distance);
         }
@@ -251,6 +269,7 @@ public class MoveSpherePhysics : MonoBehaviour
     void ClearState() {
         lastContactNormal = contactNormal;
         lastSteepNormal = steepNormal;
+        lastConnectionVelocity = connectionVelocity;
         groundContactCount = steepContactCount = climbContactCount = 0;
         contactNormal = steepNormal = climbNormal = Vector3.zero;
         connectionVelocity = Vector3.zero;
