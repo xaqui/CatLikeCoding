@@ -17579,6 +17579,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8511068319853520013, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
+      propertyPath: ballAlignSpeed
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 8511068319853520013, guid: 140b7aa2d07ce1b45b923078546aa851, type: 3}
       propertyPath: playerInputSpace
       value: 
       objectReference: {fileID: 726492808}

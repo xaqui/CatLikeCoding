@@ -23,6 +23,8 @@ public class MoveSpherePhysics : MonoBehaviour
         swimmingMaterial = default;
     [SerializeField, Min(0.1f)]
     float ballRadius = 0.5f;
+    [SerializeField, Min(0f)]
+    float ballAlignSpeed = 180f;
     [SerializeField]
     float submergenceOffset = 0.5f;
     [SerializeField, Min(0.1f)]
@@ -53,7 +55,7 @@ public class MoveSpherePhysics : MonoBehaviour
     bool desiredJump, desiresClimbing;
     int jumpPhase;
     float minGroundDotProduct, minStairsDotProduct, minClimbDotProduct;
-    Vector3 contactNormal, steepNormal, climbNormal, lastClimbNormal;
+    Vector3 contactNormal, steepNormal, climbNormal, lastContactNormal, lastSteepNormal, lastClimbNormal;
     int groundContactCount, steepContactCount, climbContactCount;
     int stepsSinceLastGrounded, stepsSinceLastJump;
     float submergence;
@@ -145,18 +147,44 @@ public class MoveSpherePhysics : MonoBehaviour
 
     void UpdateBall() {
         Material ballMaterial = normalMaterial;
+        Vector3 rotationPlaneNormal = lastContactNormal;
         if (Climbing) {
             ballMaterial = climbingMaterial;
-        }
-        else if (Swimming) {
+        } else if (Swimming) {
             ballMaterial = swimmingMaterial;
+        } else if (!OnGround) {
+            if (OnSteep) {
+                rotationPlaneNormal = lastSteepNormal;
+            }
         }
         meshRenderer.material = ballMaterial;
         Vector3 movement = body.velocity * Time.deltaTime;
+        movement -= rotationPlaneNormal * Vector3.Dot(movement, rotationPlaneNormal);
         float distance = movement.magnitude;
+        if (distance < 0.001f) {
+            return; // Abort if there is very little movement that frame
+        }
         float angle = distance * (180f / Mathf.PI) / ballRadius;
-        ball.localRotation =
-            Quaternion.Euler(Vector3.right * angle) * ball.localRotation;
+        Vector3 rotationAxis = Vector3.Cross(rotationPlaneNormal, movement).normalized;
+        Quaternion rotation = Quaternion.Euler(rotationAxis * angle) * ball.localRotation;
+        if (ballAlignSpeed > 0f) {
+            rotation = AlignBallRotation(rotationAxis, rotation, distance);
+        }
+        ball.localRotation = rotation;
+    }
+    Quaternion AlignBallRotation(Vector3 rotationAxis, Quaternion rotation, float traveledDistance) {
+        Vector3 ballAxis = ball.up;
+        float dot = Mathf.Clamp(Vector3.Dot(ballAxis, rotationAxis), -1f, 1f);
+        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+        float maxAngle = ballAlignSpeed * traveledDistance;
+
+        Quaternion newAlignment = Quaternion.FromToRotation(ballAxis, rotationAxis) * rotation;
+        if (angle <= maxAngle) {
+            return newAlignment;
+        }
+        else {
+            return Quaternion.SlerpUnclamped(rotation, newAlignment, maxAngle / angle);
+        }
     }
     bool SnapToGround() {
         if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2 || InWater) {
@@ -221,6 +249,8 @@ public class MoveSpherePhysics : MonoBehaviour
         );
     }
     void ClearState() {
+        lastContactNormal = contactNormal;
+        lastSteepNormal = steepNormal;
         groundContactCount = steepContactCount = climbContactCount = 0;
         contactNormal = steepNormal = climbNormal = Vector3.zero;
         connectionVelocity = Vector3.zero;
