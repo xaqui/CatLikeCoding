@@ -24,4 +24,10 @@ public class GameDataWriter {
         writer.Write(value.y);
         writer.Write(value.z);
     }
+    public void Write(Color value) {
+        writer.Write(value.r);
+        writer.Write(value.g);
+        writer.Write(value.b);
+        writer.Write(value.a);
+    }
 }
