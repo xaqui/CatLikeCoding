@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class Game : PersistableObject
 {
-    public PersistableObject prefab;
+    public ShapeFactory shapeFactory;
     public KeyCode createKey = KeyCode.C;
     public KeyCode newGameKey = KeyCode.N;
     public KeyCode saveKey = KeyCode.S;
     public KeyCode loadKey = KeyCode.L;
 
     public PersistentStorage storage;
-    List<PersistableObject> objects;
+    List<Shape> shapes;
 
     void Awake() {
-        objects = new List<PersistableObject>();
+        shapes = new List<Shape>();
     }
     void Update() {
         if (Input.GetKeyDown(createKey)) {
@@ -31,31 +31,31 @@ public class Game : PersistableObject
         }
     }
     void CreateObject() {
-        PersistableObject o = Instantiate(prefab);
-        Transform t = o.transform;
+        Shape instance = shapeFactory.GetRandom();
+        Transform t = instance.transform;
         t.localPosition = Random.insideUnitSphere * 5f;
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
-        objects.Add(o);
+        shapes.Add(instance);
     }
     void BeginNewGame() {
-        for (int i = 0; i < objects.Count; i++) {
-            Destroy(objects[i].gameObject);
+        for (int i = 0; i < shapes.Count; i++) {
+            Destroy(shapes[i].gameObject);
         }
-        objects.Clear();
+        shapes.Clear();
     }
     public override void Save(GameDataWriter writer) {
-        writer.Write(objects.Count);
-        for (int i = 0; i < objects.Count; i++) {
-            objects[i].Save(writer);
+        writer.Write(shapes.Count);
+        for (int i = 0; i < shapes.Count; i++) {
+            shapes[i].Save(writer);
         }
     }
     public override void Load(GameDataReader reader) {
         int count = reader.ReadInt();
         for (int i = 0; i < count; i++) {
-            PersistableObject o = Instantiate(prefab);
-            o.Load(reader);
-            objects.Add(o);
+            Shape instance = shapeFactory.Get(0);
+            instance.Load(reader);
+            shapes.Add(instance);
         }
     }
 }
