@@ -1,10 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 
 public class PaddleRight : Paddle {
-
-
     protected override void AlignToWall() {
         transform.SetLocalPositionAndRotation(new Vector3(Wall.transform.localPosition.x - Field.WALL_SEPARATION, 0, 0), Quaternion.identity);
     }
@@ -19,6 +15,5 @@ public class PaddleRight : Paddle {
         }
         return y;
     }
-
     
 }

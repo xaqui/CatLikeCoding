@@ -4,41 +4,91 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+
+public enum GameState {
+    MainMenu,
+    Match,
+    MatchEnd
+}
+
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject ballPrefab;
     List<Ball> balls = new List<Ball>();
     [SerializeField] Transform ballsContainer;
-
-
+    [SerializeField] GameObject MainPanel;
     [SerializeField] Paddle paddleLeft, paddleRight;
 
-    [SerializeField] TextMeshPro TMP_MiddleText;
+    [SerializeField] TextMeshProUGUI TMP_MiddleText;
 
-    bool isGameStarted = false;
+    GameState gameState;
 
     int scoreToWin = 3;
 
     public static event Action OnGameStart;
 
+    public int targetFrameRate = 60;
+
+    private void Awake() {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = targetFrameRate;
+        UI_ShowMainMenu();
+    }
     private void Update() {
         if (Input.GetKeyDown(KeyCode.R)) {
-            if (!isGameStarted) {
+            if (gameState.Equals(GameState.MatchEnd)) {
                 StartNewGame();
             }
         }
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (gameState.Equals(GameState.MatchEnd)) {
+                UI_ShowMainMenu();
+            }
+        }
         if (Input.GetKeyDown(KeyCode.B)) {
-            if (isGameStarted) {
+            if (gameState.Equals(GameState.Match)) {
                 SpawnBall(1f, Vector2.zero);
             }
         }
-        if (isGameStarted) {
+        if (gameState.Equals(GameState.Match)) {
             foreach (Ball ball in balls) {
                 ball.UpdateVisualization();
             }
         }
     }
-
+    private void FixedUpdate() {
+        if (gameState.Equals(GameState.Match)) {
+            if(paddleLeft.isAI)
+                paddleLeft.UpdateHighPriorityTarget(balls);
+            if(paddleRight.isAI)
+                paddleRight.UpdateHighPriorityTarget(balls);
+            paddleLeft.Move(Field.FieldSize.y / 2 + 1.5f);
+            paddleRight.Move(Field.FieldSize.y / 2 + 1.5f);
+            UpdateBalls();
+        } 
+    }
+    public void UI_StartGame(int HumanPlayersCount) {
+        if(HumanPlayersCount == 1) {
+            paddleLeft.isAI = false;
+            paddleRight.isAI = true;
+        } else if (HumanPlayersCount == 2) {
+            paddleLeft.isAI = false;
+            paddleRight.isAI = false;
+        } else {
+            paddleLeft.isAI = true;
+            paddleRight.isAI = true;
+        }
+        StartNewGame();
+        UI_HideMainMenu();
+    }
+    public void UI_HideMainMenu() {
+        MainPanel.SetActive(false);
+    }
+    public void UI_ShowMainMenu() {
+        gameState = GameState.MainMenu;
+        TMP_MiddleText.gameObject.SetActive(false);
+        MainPanel.SetActive(true);
+    }
     public void SpawnBall(float delayInSeconds, Vector2 pos) {
         Ball ballInstance = Instantiate(ballPrefab).GetComponent<Ball>();
         ballInstance.transform.SetParent(ballsContainer);
@@ -46,15 +96,6 @@ public class GameManager : MonoBehaviour
         ballInstance.ResetBall();
         StartCoroutine(BeginRoundAfterDelay(ballInstance, delayInSeconds));
     }
-
-    public void LaunchBall(Vector2 pos, Vector2 velocity) {
-        Ball ballInstance = Instantiate(ballPrefab).GetComponent<Ball>();
-        ballInstance.transform.SetParent(ballsContainer);
-        balls.Add(ballInstance);
-        float bias = UnityEngine.Random.Range(-2f, 2f);
-        ballInstance.LaunchBall(pos+Vector2.right*2, new Vector2(velocity.x, velocity.y + bias));
-    }
-
     void ClearAllBalls() {
         balls.Clear();
         int childCount = ballsContainer.childCount;
@@ -63,29 +104,13 @@ public class GameManager : MonoBehaviour
             Destroy(child);
         }
     }
-
-    private void Awake() {
-        TMP_MiddleText.gameObject.SetActive(false);
-    }
     void StartNewGame() {
+        gameState = GameState.Match;
         ClearAllBalls();
         TMP_MiddleText.gameObject.SetActive(false);
-        isGameStarted = true;
         OnGameStart?.Invoke();
         SpawnBall(1f, Vector2.zero);
     }
-
-    private void FixedUpdate() {
-        if (isGameStarted) {
-            paddleLeft.UpdateHighPriorityTarget(balls);
-            paddleRight.UpdateHighPriorityTarget(balls);
-            paddleLeft.Move(Field.FieldSize.y / 2 + 1.5f);
-            paddleRight.Move(Field.FieldSize.y / 2 + 1.5f);
-            UpdateBalls();
-
-        } 
-    }
-
     private void UpdateBalls() {
         if (balls.Count > 0) {
             for (int i = balls.Count-1; i >= 0; i--) {
@@ -103,7 +128,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
     void EndGame() {
         TMP_MiddleText.gameObject.SetActive(true);
         if(paddleLeft.Score > paddleRight.Score) {
@@ -117,33 +141,32 @@ public class GameManager : MonoBehaviour
             TMP_MiddleText.SetText("Tie");
         }
         ClearAllBalls();
-        isGameStarted = false;
+        gameState = GameState.MatchEnd;
     }
-
     bool CheckForGoal(float x, Ball ball) {
         float xExtents = Field.FieldSize.x / 2 - ball.Extents;
         if (x < -xExtents) {
             // Goal for Paddle R
             if(paddleRight.ScorePoint(scoreToWin)) {
                 EndGame();
+            } else {
+                ClearAllBalls();
+                SpawnBall(1f, Vector2.zero);
             }
-            ClearAllBalls();
-            SpawnBall(1f, Vector2.zero);
             return true;
         }
         else if (x > xExtents) {
             // Goal for Paddle L
             if (paddleLeft.ScorePoint(scoreToWin)) {
                 EndGame();
+            } else {
+                ClearAllBalls();
+                SpawnBall(1f, Vector2.zero);
             }
-            ClearAllBalls();
-            SpawnBall(1f, Vector2.zero);
             return true;
         }
         return false;
     }
-
-
     IEnumerator BeginRoundAfterDelay(Ball ball, float delayInSeconds) {
         yield return new WaitForSeconds(delayInSeconds);
         if(ball != null) {
@@ -151,6 +174,4 @@ public class GameManager : MonoBehaviour
         }
         yield return null;
     }
-
-    
 }

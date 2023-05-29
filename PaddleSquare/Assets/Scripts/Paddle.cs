@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -12,7 +11,7 @@ public abstract class Paddle : MonoBehaviour
     [SerializeField, ColorUsage(true, true)]
     Color goalColor = Color.white;
 
-    [SerializeField] bool isAI;
+    public bool isAI;
 
     [SerializeField, Min(0f)] protected float speed = 10f,
         maxTargetingBias = 0.75f;
@@ -50,8 +49,6 @@ public abstract class Paddle : MonoBehaviour
     }
     abstract protected void AlignToWall();
     abstract protected float AdjustByPlayer(float y);
-
-
     public void UpdateHighPriorityTarget(List<Ball> balls) {
         if (balls == null) {
             target = null;
@@ -70,7 +67,6 @@ public abstract class Paddle : MonoBehaviour
 
         for (int i = 0; i < balls.Count; i++) {
             float distance = Mathf.Abs(WallPosition2D.x - balls[i].Position.x);
-            //float distance = Vector2.Distance(balls[i].Position, WallPosition2D);
             if (distance< minDistance) {
                 minDistance = distance;
                 index = i;
@@ -85,13 +81,11 @@ public abstract class Paddle : MonoBehaviour
         SetScore(0);
         TMP_Score.gameObject.SetActive(true);
     }
-
     protected void SetScore(int scoreValue) {
         Score = scoreValue;
         TMP_Score.SetText(Score+"");
         scoreMaterial.SetColor(faceColorId, Color.white *1.5f);
     }
-
     public void Move(float arenaExtents) {
         Vector3 p = transform.localPosition;
         if (isAI) {
@@ -106,7 +100,6 @@ public abstract class Paddle : MonoBehaviour
         p.z = Mathf.Clamp(p.z, -limit, limit);
         transform.localPosition = p;
     }
-
     float AdjustByAI(float y, float target) {
         target += targetingBias;
         if (y < target) {
@@ -114,18 +107,6 @@ public abstract class Paddle : MonoBehaviour
         }
         return Mathf.Max(y - speed * Time.deltaTime, target);
     }
-    public void InitiateCooldown() {
-        if (isActive) {
-            //StartCoroutine(Cooldown(.5f));
-        }
-    }
-    IEnumerator Cooldown(float timeInSeconds) {
-        isActive = false;
-        yield return new WaitForSeconds(timeInSeconds);
-        isActive = true;
-        yield return null;
-    }
-    
     public bool HitBall(Vector2 ballPosition, float ballExtents, out Vector2 HitPoint, out float HitFactor) {
         Vector2 paddlePosition2D = new Vector2(transform.localPosition.x, transform.localPosition.z);
         HitFactor =
@@ -150,17 +131,14 @@ public abstract class Paddle : MonoBehaviour
 
         return success;
     }
-
     public bool ScorePoint(int pointsToWin) {
         goalMaterial.SetFloat(timeOfLastHitId, Time.time);
         SetScore(Score + 1);
         return Score >= pointsToWin;
     }
-
     private void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(extents.x, 1, extents.y));
     }
-
     public bool BounceXIfNeeded(Ball ball) {
         Vector2 HitPoint;
         float HitFactor;

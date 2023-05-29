@@ -1,17 +1,6 @@
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
 
-public struct SerializedBallData {
-    public SerializedBallData(float VelocityX, float Distance, Ball ballInstance) {
-        this.VelocityX = VelocityX;
-        this.Distance = Distance;
-        this.ballInstance = ballInstance;
-    }
-    public Ball ballInstance { get; }
-    public float VelocityX { get; }
-    public float Distance { get; }
-}
-
 public class Ball : MonoBehaviour
 {
     [SerializeField, Min(0f)]
@@ -56,14 +45,12 @@ public class Ball : MonoBehaviour
     private void Awake() {
         ballMaterial = GetComponent<MeshRenderer>().material;
     }
-
     private void FixedUpdate() {
         stepsSinceLastBounce++;
         if (isLive) {
             BounceYIfNeeded(position.y);
         }
     }
-
     public void StartNewGame() {
         isLive = true;
         UpdateVisualization();
@@ -79,16 +66,6 @@ public class Ball : MonoBehaviour
         SetTrailEmission(true);
         trailParticleSystem.Play();
         RandomizeParticlesColor();
-    }
-    public void LaunchBall(Vector2 pos, Vector2 vel) {
-        SetTrailEmission(false);
-        position = pos;
-        velocity = vel;
-        UpdateVisualization();
-        SetTrailEmission(true);
-        trailParticleSystem.Play();
-        RandomizeParticlesColor();
-        isLive = true;
     }
     public void IncreaseSpeed(float speedFactor) {
         float velocityY = maxYSpeed * speedFactor;
@@ -119,7 +96,6 @@ public class Ball : MonoBehaviour
             RandomizeParticlesColor();
         }
     }
-
     public void BounceY(float boundary) {
         stepsSinceLastBounce = 0;
         position.y = 2f * boundary - position.y;
@@ -141,7 +117,6 @@ public class Ball : MonoBehaviour
     }
     void EmitBounceParticles(float x, float z, float rotation) {
         ShapeModule shape = bounceParticleSystem.shape;
-        //shape.position = new Vector3(x, 0f, z);
         shape.rotation = new Vector3(0f, rotation, 0f);
         bounceParticleSystem.Emit(bounceParticleEmission);
     }
